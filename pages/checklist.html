@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checklist TSSR → DevOps</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/global.css">
+<style>
+  .page-header { padding: 2rem 0 1.5rem; }
+  .page-header h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.3rem; }
+  .page-header p { color: var(--muted); font-family: var(--mono); font-size: 0.8rem; }
+
+  .global-progress {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem;
+  }
+  .gp-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+  .gp-label { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+  .gp-pct { font-family: var(--mono); font-size: 1.6rem; font-weight: 700; color: var(--accent); }
+  .gp-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .gp-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--green)); border-radius: 4px; transition: width 0.5s ease; }
+  .gp-sub { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); margin-top: 0.5rem; }
+
+  .phase-block { margin-bottom: 2.5rem; }
+  .phase-header {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1rem 1.25rem; border-radius: 8px;
+    margin-bottom: 1rem; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .phase-header:hover { opacity: 0.85; }
+  .phase-0 { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); }
+  .phase-1 { background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.2); }
+  .phase-2 { background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.25); }
+  .phase-3 { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); }
+
+  .phase-icon { font-size: 1.5rem; }
+  .phase-info { flex: 1; }
+  .phase-title { font-size: 1rem; font-weight: 800; }
+  .phase-sub { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+  .phase-progress { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); text-align: right; }
+
+  .items-list { display: grid; gap: 0.6rem; }
+
+  .check-item {
+    display: flex; align-items: flex-start; gap: 1rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1rem 1.2rem;
+    cursor: pointer; transition: all 0.18s;
+    user-select: none;
+  }
+  .check-item:hover { border-color: rgba(0,212,255,0.3); transform: translateX(3px); }
+  .check-item.done { background: rgba(16,185,129,0.05); border-color: rgba(16,185,129,0.25); }
+  .check-item.done .item-title { text-decoration: line-through; color: var(--muted); }
+
+  .check-box {
+    width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px;
+    border: 2px solid var(--border); border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; transition: all 0.2s;
+  }
+  .check-item.done .check-box { background: var(--green); border-color: var(--green); color: white; }
+
+  .item-content { flex: 1; }
+  .item-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.2rem; }
+  .item-desc { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
+
+  .item-tags { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 0.4rem; }
+
+  .reset-btn {
+    font-family: var(--mono); font-size: 0.72rem;
+    color: var(--muted); background: transparent;
+    border: 1px solid var(--border); padding: 0.4rem 0.85rem;
+    border-radius: 4px; cursor: pointer; transition: all 0.2s;
+  }
+  .reset-btn:hover { border-color: var(--red); color: var(--red); }
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">TSSR<span>→</span>DevOps</a>
+    <div class="nav-links">
+      <a href="../index.html">Accueil</a>
+      <a href="examen.html">Examen</a>
+      <a href="cours.html">Cours</a>
+      <a href="checklist.html" class="active">Checklist</a>
+      <a href="tableau.html">Tableau de bord</a>
+    </div>
+    <button class="nav-burger" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
+    <div>
+      <h1>✅ Checklist TSSR → DevOps</h1>
+      <p>// Coche les compétences au fur et à mesure que tu les maîtrises</p>
+    </div>
+    <button class="reset-btn" onclick="resetAll()">🗑 Tout réinitialiser</button>
+  </div>
+
+  <div class="global-progress">
+    <div class="gp-top">
+      <span class="gp-label">// Progression globale</span>
+      <span class="gp-pct" id="global-pct">0%</span>
+    </div>
+    <div class="gp-bar"><div class="gp-fill" id="global-fill" style="width:0%"></div></div>
+    <div class="gp-sub" id="global-sub">0 / 0 compétences validées</div>
+  </div>
+
+  <div id="checklist-container"></div>
+</div>
+
+<script src="../js/storage.js"></script>
+<script>
+const CHECKLIST = [
+  {
+    id: "phase0",
+    phase: "🎓 TSSR — Socle à maîtriser",
+    color: "phase-0",
+    desc: "Compétences fondamentales du BTS TSSR",
+    items: [
+      {id:"t01", title:"Modèle OSI — les 7 couches", desc:"Nommer et expliquer le rôle de chaque couche, donner des exemples de protocoles", tags:["Réseaux","Fondamentaux"]},
+      {id:"t02", title:"Adressage IP et VLSM", desc:"Calcul de masques, sous-réseaux, plages d'hôtes, adresses de broadcast", tags:["Réseaux","IP"]},
+      {id:"t03", title:"Configuration d'un switch Cisco (VLAN, trunk, STP)", desc:"Commandes de base IOS, VLAN access/trunk, spanning-tree", tags:["Réseaux","Cisco"]},
+      {id:"t04", title:"Configuration d'un routeur (routage statique, NAT)", desc:"Routes statiques, NAT overload, interfaces WAN/LAN", tags:["Réseaux","Routage"]},
+      {id:"t05", title:"Installation et config Linux (Ubuntu/Debian)", desc:"Partitionnement, gestionnaire de paquets (apt), services systemd", tags:["Systèmes","Linux"]},
+      {id:"t06", title:"Administration Windows Server + Active Directory", desc:"Rôles AD DS, DNS, DHCP, GPO de base, OUs, utilisateurs", tags:["Systèmes","Windows"]},
+      {id:"t07", title:"Permissions Linux (chmod, chown, ACL)", desc:"Notation octale et symbolique, sticky bit, setuid, ACL étendues", tags:["Systèmes","Sécurité"]},
+      {id:"t08", title:"Services réseau (DHCP, DNS, SMTP, FTP, SSH)", desc:"Configuration de base de chaque service, ports, protocoles", tags:["Protocoles"]},
+      {id:"t09", title:"Sauvegardes et RAID (0,1,5,10)", desc:"Types de RAID, stratégie 3-2-1, outils de backup Linux", tags:["Infrastructure","Stockage"]},
+      {id:"t10", title:"Notions de sécurité (pare-feu, VPN, antivirus)", desc:"iptables/firewalld de base, types de menaces, VPN SSL/IPSec", tags:["Sécurité"]},
+    ]
+  },
+  {
+    id: "phase1",
+    phase: "☁️ Cloud & Virtualisation",
+    color: "phase-1",
+    desc: "Compétences de transition vers le cloud",
+    items: [
+      {id:"c01", title:"Virtualisation avec Proxmox ou VMware ESXi", desc:"Créer/gérer des VMs, snapshots, templates, réseau virtuel", tags:["Virtualisation"]},
+      {id:"c02", title:"Docker — images, conteneurs, volumes, réseaux", desc:"Dockerfile, docker run, docker-compose, registres", tags:["DevOps","Conteneurs"]},
+      {id:"c03", title:"Premiers pas AWS ou Azure", desc:"Compte gratuit, EC2/VM, S3/Blob Storage, règles de sécurité (Security Groups)", tags:["Cloud","AWS","Azure"]},
+      {id:"c04", title:"Certification AWS Cloud Practitioner (CLF-C02)", desc:"Certification d'entrée cloud (~100€), valide la connaissance des services AWS", tags:["Certification","AWS"]},
+      {id:"c05", title:"Réseaux cloud (VPC, sous-réseaux, groupes de sécurité)", desc:"VPC, CIDR, routes, Internet Gateway, NAT Gateway", tags:["Cloud","Réseaux"]},
+      {id:"c06", title:"Stockage cloud (S3/Blob, EBS/Disques managés)", desc:"Types de stockage, politiques de lifecycle, réplication", tags:["Cloud","Stockage"]},
+      {id:"c07", title:"IAM — gestion des identités et permissions cloud", desc:"Utilisateurs, rôles, policies, principe du moindre privilège en cloud", tags:["Cloud","Sécurité"]},
+    ]
+  },
+  {
+    id: "phase2",
+    phase: "🔧 DevOps — Outils cœur de métier",
+    color: "phase-2",
+    desc: "Compétences spécifiques au rôle DevOps",
+    items: [
+      {id:"d01", title:"Git — versioning, branches, merge, rebase", desc:"git init/clone/commit/push/pull, branches, résolution de conflits, GitHub/GitLab", tags:["DevOps","Git"]},
+      {id:"d02", title:"CI/CD avec GitHub Actions ou GitLab CI", desc:"Pipelines, stages, jobs, artefacts, déploiement automatique", tags:["DevOps","CI/CD"]},
+      {id:"d03", title:"Ansible — playbooks et gestion de configuration", desc:"Inventaires, modules, rôles, variables, idempotence", tags:["DevOps","IaC"]},
+      {id:"d04", title:"Terraform — Infrastructure as Code", desc:"Providers (AWS/Azure), resources, state, plan/apply, modules", tags:["DevOps","IaC","Cloud"]},
+      {id:"d05", title:"Kubernetes — bases (pods, deployments, services)", desc:"kubectl, manifests YAML, namespaces, ingress, scaling", tags:["DevOps","K8s","Conteneurs"]},
+      {id:"d06", title:"Monitoring (Prometheus, Grafana, alertes)", desc:"Métriques, dashboards, règles d'alerte, Alertmanager", tags:["DevOps","Monitoring"]},
+      {id:"d07", title:"Scripting Bash et Python de base", desc:"Variables, boucles, conditions, fonctions, scripts d'automatisation", tags:["DevOps","Scripting"]},
+      {id:"d08", title:"Gestion des logs (ELK stack ou Loki/Grafana)", desc:"Elasticsearch, Kibana, Logstash ou Loki, recherche et filtrage de logs", tags:["DevOps","Monitoring"]},
+    ]
+  },
+  {
+    id: "phase3",
+    phase: "🚀 Niveau avancé — Se démarquer",
+    color: "phase-3",
+    desc: "Compétences qui différencient un profil DevOps",
+    items: [
+      {id:"a01", title:"DevSecOps — intégrer la sécurité dans le pipeline CI/CD", desc:"SAST (SonarQube), DAST, scan d'images Docker (Trivy), secrets management (Vault)", tags:["DevSecOps","Sécurité"]},
+      {id:"a02", title:"Certification AWS Solutions Architect Associate (SAA-C03)", desc:"Certification la plus reconnue pour les architectures cloud AWS (~150€)", tags:["Certification","AWS"]},
+      {id:"a03", title:"FinOps — optimisation des coûts cloud", desc:"AWS Cost Explorer, Reserved Instances, budgets, rightsizing", tags:["Cloud","FinOps"]},
+      {id:"a04", title:"Kubernetes avancé (Helm, Kustomize, Operators)", desc:"Helm charts, packaging d'applications, gestion d'environnements multiples", tags:["K8s","DevOps"]},
+      {id:"a05", title:"Projet personnel visible sur GitHub", desc:"Pipeline CI/CD complet, infra Terraform déployée, README professionnel", tags:["Portfolio","DevOps"]},
+      {id:"a06", title:"Participation à la communauté (meetups, contributions open source)", desc:"DevOps Nantes meetup, contributions GitHub, blog technique", tags:["Réseau","Communauté"]},
+    ]
+  }
+];
+
+let state = {};
+
+function init() {
+  const saved = Storage.get();
+  state = saved.checklist || {};
+  renderChecklist();
+  updateGlobal();
+}
+
+function renderChecklist() {
+  const container = document.getElementById('checklist-container');
+  container.innerHTML = '';
+
+  CHECKLIST.forEach(phase => {
+    const doneCount = phase.items.filter(it => state[it.id]).length;
+    const block = document.createElement('div');
+    block.className = 'phase-block';
+
+    block.innerHTML = `
+      <div class="phase-header ${phase.color}">
+        <span class="phase-icon">${phase.phase.split(' ')[0]}</span>
+        <div class="phase-info">
+          <div class="phase-title">${phase.phase}</div>
+          <div class="phase-sub">${phase.desc}</div>
+        </div>
+        <div class="phase-progress">${doneCount}/${phase.items.length}</div>
+      </div>
+      <div class="items-list" id="list-${phase.id}"></div>
+    `;
+    container.appendChild(block);
+
+    const list = block.querySelector(`#list-${phase.id}`);
+    phase.items.forEach(item => {
+      const done = !!state[item.id];
+      const div = document.createElement('div');
+      div.className = 'check-item' + (done ? ' done' : '');
+      div.onclick = () => toggle(item.id);
+      div.innerHTML = `
+        <div class="check-box">${done ? '✓' : ''}</div>
+        <div class="item-content">
+          <div class="item-title">${item.title}</div>
+          <div class="item-desc">${item.desc}</div>
+          <div class="item-tags">${item.tags.map(t=>`<span class="tag tag-blue">${t}</span>`).join('')}</div>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  });
+}
+
+function toggle(id) {
+  state[id] = !state[id];
+  Storage.saveChecklist(state);
+  renderChecklist();
+  updateGlobal();
+}
+
+function updateGlobal() {
+  const all = CHECKLIST.flatMap(p => p.items);
+  const done = all.filter(it => state[it.id]).length;
+  const pct = all.length ? Math.round(done / all.length * 100) : 0;
+  document.getElementById('global-pct').textContent = pct + '%';
+  document.getElementById('global-fill').style.width = pct + '%';
+  document.getElementById('global-sub').textContent = `${done} / ${all.length} compétences validées`;
+}
+
+function resetAll() {
+  if (!confirm('Réinitialiser toute la checklist ?')) return;
+  state = {};
+  Storage.saveChecklist(state);
+  renderChecklist();
+  updateGlobal();
+}
+
+init();
+</script>
+</body>
+</html>

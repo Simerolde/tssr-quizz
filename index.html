@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSSR → DevOps | Centre de formation</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/global.css">
+<style>
+  .hero {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    animation: fadeDown 0.6s ease;
+  }
+  .hero-badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    border: 1px solid rgba(0,212,255,0.3);
+    padding: 0.3rem 1rem;
+    border-radius: 20px;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+  }
+  .hero h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    background: linear-gradient(135deg, #ffffff 0%, var(--accent) 60%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+  }
+  .hero-sub {
+    font-family: var(--mono);
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 2.5rem;
+    line-height: 1.8;
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-bottom: 4rem;
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    animation: fadeIn 0.8s ease 0.2s both;
+  }
+  .stat-item { text-align: center; }
+  .stat-num {
+    font-family: var(--mono);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+  }
+  .stat-lbl {
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .stat-sep { width: 1px; background: var(--border); align-self: stretch; }
+
+  /* NAV CARDS */
+  .nav-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 3rem;
+  }
+  .nav-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    text-decoration: none;
+    color: var(--text);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s ease;
+    cursor: pointer;
+    display: block;
+    animation: fadeIn 0.6s ease both;
+  }
+  .nav-card:nth-child(1) { animation-delay: 0.1s; }
+  .nav-card:nth-child(2) { animation-delay: 0.2s; }
+  .nav-card:nth-child(3) { animation-delay: 0.3s; }
+  .nav-card:nth-child(4) { animation-delay: 0.4s; }
+
+  .nav-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,212,255,0.04), rgba(124,58,237,0.04));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .nav-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,212,255,0.12);
+  }
+  .nav-card:hover::after { opacity: 1; }
+
+  .card-stripe {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 12px 12px 0 0;
+  }
+  .stripe-exam    { background: linear-gradient(90deg, #00d4ff, #7c3aed); }
+  .stripe-cours   { background: linear-gradient(90deg, #10b981, #059669); }
+  .stripe-check   { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+  .stripe-tableau { background: linear-gradient(90deg, #8b5cf6, #ec4899); }
+
+  .card-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.4rem; }
+  .card-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.6; font-family: var(--mono); }
+  .card-arrow {
+    position: absolute;
+    bottom: 1.5rem; right: 1.5rem;
+    font-size: 1.2rem;
+    opacity: 0;
+    transition: all 0.2s;
+    transform: translateX(-8px);
+  }
+  .nav-card:hover .card-arrow { opacity: 1; transform: translateX(0); }
+
+  /* PROGRESS PREVIEW */
+  .progress-preview {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    animation: fadeIn 0.6s ease 0.5s both;
+  }
+  .preview-title {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 1.5rem;
+  }
+  .module-bars { display: grid; gap: 0.8rem; }
+  .mod-row { display: flex; align-items: center; gap: 1rem; }
+  .mod-name {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    width: 120px;
+    flex-shrink: 0;
+    color: var(--muted);
+  }
+  .bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 1s ease;
+    width: 0%;
+  }
+  .mod-pct {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    width: 35px;
+    text-align: right;
+  }
+
+  @keyframes fadeDown {
+    from { opacity:0; transform:translateY(-20px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity:0; transform:translateY(12px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-inner">
+    <a class="nav-logo" href="index.html">TSSR<span>→</span>DevOps</a>
+    <div class="nav-links">
+      <a href="index.html" class="active">Accueil</a>
+      <a href="pages/examen.html">Examen</a>
+      <a href="pages/cours.html">Cours</a>
+      <a href="pages/checklist.html">Checklist</a>
+      <a href="pages/tableau.html">Tableau de bord</a>
+    </div>
+    <button class="nav-burger" onclick="toggleMenu()">☰</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="hero">
+    <div class="hero-badge">// Plateforme de formation IT</div>
+    <h1>De TSSR<br>à DevOps Cloud</h1>
+    <p class="hero-sub">
+      Révise le BTS TSSR · Valide tes compétences · Trace ta route vers DevOps<br>
+      Tout en un seul endroit, gratuitement.
+    </p>
+  </div>
+
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat-item">
+      <span class="stat-num" id="s-exams">0</span>
+      <span class="stat-lbl">Examens passés</span>
+    </div>
+    <div class="stat-sep"></div>
+    <div class="stat-item">
+      <span class="stat-num" id="s-questions">0</span>
+      <span class="stat-lbl">Questions répondues</span>
+    </div>
+    <div class="stat-sep"></div>
+    <div class="stat-item">
+      <span class="stat-num" id="s-score">—</span>
+      <span class="stat-lbl">Meilleur score</span>
+    </div>
+    <div class="stat-sep"></div>
+    <div class="stat-item">
+      <span class="stat-num" id="s-check">0%</span>
+      <span class="stat-lbl">Checklist complétée</span>
+    </div>
+  </div>
+
+  <div class="nav-grid">
+    <a class="nav-card" href="pages/examen.html">
+      <div class="card-stripe stripe-exam"></div>
+      <div class="card-icon">🎯</div>
+      <div class="card-title">Examen TSSR</div>
+      <div class="card-desc">QCM chronométré · 6 modules · 3 niveaux de difficulté · Corrections détaillées</div>
+      <div class="card-arrow">→</div>
+    </a>
+    <a class="nav-card" href="pages/cours.html">
+      <div class="card-stripe stripe-cours"></div>
+      <div class="card-icon">📚</div>
+      <div class="card-title">Fiches de cours</div>
+      <div class="card-desc">Résumés structurés · Réseaux, Systèmes, Sécu, Cloud · Exemples pratiques</div>
+      <div class="card-arrow">→</div>
+    </a>
+    <a class="nav-card" href="pages/checklist.html">
+      <div class="card-stripe stripe-check"></div>
+      <div class="card-icon">✅</div>
+      <div class="card-title">Checklist TSSR → DevOps</div>
+      <div class="card-desc">Compétences à valider pour passer du TSSR au DevOps Cloud · Suivi de progression</div>
+      <div class="card-arrow">→</div>
+    </a>
+    <a class="nav-card" href="pages/tableau.html">
+      <div class="card-stripe stripe-tableau"></div>
+      <div class="card-icon">📊</div>
+      <div class="card-title">Tableau de bord</div>
+      <div class="card-desc">Stats par module · Historique des examens · Points forts et axes d'amélioration</div>
+      <div class="card-arrow">→</div>
+    </a>
+  </div>
+
+  <div class="progress-preview">
+    <div class="preview-title">// Ta progression par module (derniers examens)</div>
+    <div class="module-bars" id="module-bars">
+      <div class="mod-row"><span class="mod-name">🌐 Réseaux</span><div class="bar-track"><div class="bar-fill" id="b-reseau"></div></div><span class="mod-pct" id="p-reseau">—</span></div>
+      <div class="mod-row"><span class="mod-name">🖥️ Systèmes</span><div class="bar-track"><div class="bar-fill" id="b-sys"></div></div><span class="mod-pct" id="p-sys">—</span></div>
+      <div class="mod-row"><span class="mod-name">🔐 Sécurité</span><div class="bar-track"><div class="bar-fill" id="b-secu"></div></div><span class="mod-pct" id="p-secu">—</span></div>
+      <div class="mod-row"><span class="mod-name">☁️ Virtua.</span><div class="bar-track"><div class="bar-fill" id="b-virt"></div></div><span class="mod-pct" id="p-virt">—</span></div>
+      <div class="mod-row"><span class="mod-name">📡 Protocoles</span><div class="bar-track"><div class="bar-fill" id="b-proto"></div></div><span class="mod-pct" id="p-proto">—</span></div>
+      <div class="mod-row"><span class="mod-name">🔧 Infra</span><div class="bar-track"><div class="bar-fill" id="b-infra"></div></div><span class="mod-pct" id="p-infra">—</span></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/storage.js"></script>
+<script>
+  function toggleMenu() {
+    document.querySelector('.nav-links').classList.toggle('open');
+  }
+
+  function loadDashboard() {
+    const data = Storage.get();
+    document.getElementById('s-exams').textContent = data.exams.length;
+    const totalQ = data.exams.reduce((a,e) => a + e.total, 0);
+    document.getElementById('s-questions').textContent = totalQ;
+    const best = data.exams.length ? Math.max(...data.exams.map(e => e.score)) + '%' : '—';
+    document.getElementById('s-score').textContent = best;
+    const checks = data.checklist || {};
+    const allKeys = Object.keys(checks);
+    const done = allKeys.filter(k => checks[k]).length;
+    document.getElementById('s-check').textContent = allKeys.length ? Math.round(done/allKeys.length*100)+'%' : '0%';
+
+    // Module bars
+    const mods = { 'Réseaux':'reseau','Systèmes':'sys','Sécurité':'secu','Virtualisation':'virt','Protocoles':'proto','Infrastructure':'infra' };
+    Object.entries(mods).forEach(([mod, id]) => {
+      const scores = data.exams.flatMap(e => e.modules && e.modules[mod] ? [e.modules[mod]] : []);
+      if (scores.length) {
+        const avg = Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
+        setTimeout(() => {
+          document.getElementById('b-'+id).style.width = avg + '%';
+          document.getElementById('p-'+id).textContent = avg + '%';
+        }, 300);
+      }
+    });
+  }
+
+  loadDashboard();
+</script>
+</body>
+</html>

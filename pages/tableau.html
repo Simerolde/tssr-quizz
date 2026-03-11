@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableau de bord | TSSR → DevOps</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/global.css">
+<style>
+  .page-header { padding: 2rem 0 1.5rem; }
+  .page-header h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.3rem; }
+  .page-header p { color: var(--muted); font-family: var(--mono); font-size: 0.8rem; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .kpi-val { font-family: var(--mono); font-size: 2rem; font-weight: 700; margin-bottom: 0.2rem; }
+  .kpi-lbl { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+  @media(max-width:700px){ .two-col { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; }
+  .panel-title { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
+
+  .mod-stat-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.85rem; }
+  .ms-icon { width: 22px; text-align: center; font-size: 1rem; }
+  .ms-name { font-family: var(--mono); font-size: 0.72rem; width: 90px; flex-shrink: 0; }
+  .ms-track { flex:1; height: 6px; background: var(--border); border-radius: 3px; overflow:hidden; }
+  .ms-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+  .ms-pct { font-family: var(--mono); font-size: 0.68rem; width: 38px; text-align: right; }
+
+  .history-list { display: grid; gap: 0.6rem; max-height: 340px; overflow-y: auto; }
+  .hist-item {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 7px; padding: 0.75rem 1rem;
+  }
+  .hist-left { display: flex; align-items: center; gap: 0.75rem; }
+  .hist-score {
+    font-family: var(--mono); font-size: 1.1rem; font-weight: 700;
+    width: 52px; text-align: center;
+  }
+  .hist-detail { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); line-height: 1.5; }
+  .hist-date { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); }
+
+  .empty-state { text-align: center; padding: 2rem; color: var(--muted); font-family: var(--mono); font-size: 0.8rem; }
+  .empty-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+
+  .advice-grid { display: grid; gap: 0.75rem; }
+  .advice-item { display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.9rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; }
+  .advice-icon { font-size: 1.1rem; flex-shrink: 0; }
+  .advice-text { font-size: 0.82rem; line-height: 1.5; }
+  .advice-text strong { display: block; margin-bottom: 0.1rem; }
+  .advice-text span { color: var(--muted); font-family: var(--mono); font-size: 0.72rem; }
+
+  .reset-btn { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); background: transparent; border: 1px solid var(--border); padding: 0.35rem 0.7rem; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+  .reset-btn:hover { border-color: var(--red); color: var(--red); }
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">TSSR<span>→</span>DevOps</a>
+    <div class="nav-links">
+      <a href="../index.html">Accueil</a>
+      <a href="examen.html">Examen</a>
+      <a href="cours.html">Cours</a>
+      <a href="checklist.html">Checklist</a>
+      <a href="tableau.html" class="active">Tableau de bord</a>
+    </div>
+    <button class="nav-burger" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
+    <div>
+      <h1>📊 Tableau de bord</h1>
+      <p>// Analyse de tes performances et progression</p>
+    </div>
+    <button class="reset-btn" onclick="resetData()">🗑 Effacer les données</button>
+  </div>
+
+  <div class="kpi-grid" id="kpis"></div>
+
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-title">// Score moyen par module</div>
+      <div id="mod-stats"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">// Historique des examens (50 derniers)</div>
+      <div class="history-list" id="history"></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-bottom:2rem;">
+    <div class="panel-title">// Conseils personnalisés</div>
+    <div class="advice-grid" id="advice"></div>
+  </div>
+</div>
+
+<script src="../js/storage.js"></script>
+<script>
+const MODULES = [
+  {id:"Réseaux",icon:"🌐"},{id:"Systèmes",icon:"🖥️"},
+  {id:"Sécurité",icon:"🔐"},{id:"Virtualisation",icon:"☁️"},
+  {id:"Protocoles",icon:"📡"},{id:"Infrastructure",icon:"🔧"},
+];
+
+function getColor(pct) {
+  if (pct >= 80) return 'var(--green)';
+  if (pct >= 55) return 'var(--orange)';
+  return 'var(--red)';
+}
+
+function init() {
+  const data = Storage.get();
+  const exams = data.exams || [];
+  const modStats = Storage.getModuleStats();
+
+  // KPIs
+  const totalQ = exams.reduce((a,e)=>a+e.total,0);
+  const avgScore = exams.length ? Math.round(exams.reduce((a,e)=>a+e.score,0)/exams.length) : null;
+  const bestScore = exams.length ? Math.max(...exams.map(e=>e.score)) : null;
+  const checks = data.checklist || {};
+  const allChecks = 31; // total items in checklist
+  const doneChecks = Object.values(checks).filter(Boolean).length;
+
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi-card"><div class="kpi-val" style="color:var(--accent)">${exams.length}</div><div class="kpi-lbl">Examens passés</div></div>
+    <div class="kpi-card"><div class="kpi-val" style="color:var(--accent)">${totalQ}</div><div class="kpi-lbl">Questions répondues</div></div>
+    <div class="kpi-card"><div class="kpi-val" style="color:${avgScore?getColor(avgScore):'var(--muted)'}">${avgScore !== null ? avgScore+'%' : '—'}</div><div class="kpi-lbl">Score moyen</div></div>
+    <div class="kpi-card"><div class="kpi-val" style="color:${bestScore?getColor(bestScore):'var(--muted)'}">${bestScore !== null ? bestScore+'%' : '—'}</div><div class="kpi-lbl">Meilleur score</div></div>
+    <div class="kpi-card"><div class="kpi-val" style="color:var(--green)">${doneChecks}/${allChecks}</div><div class="kpi-lbl">Checklist</div></div>
+  `;
+
+  // Module stats
+  const modEl = document.getElementById('mod-stats');
+  if (!Object.keys(modStats).length) {
+    modEl.innerHTML = '<div class="empty-state"><div class="empty-icon">📡</div>Passe ton premier examen<br>pour voir tes stats par module</div>';
+  } else {
+    modEl.innerHTML = '';
+    MODULES.forEach(mod => {
+      const s = modStats[mod.id];
+      if (!s) return;
+      const color = getColor(s.avg);
+      modEl.innerHTML += `
+        <div class="mod-stat-row">
+          <span class="ms-icon">${mod.icon}</span>
+          <span class="ms-name">${mod.id}</span>
+          <div class="ms-track"><div class="ms-fill" style="width:${s.avg}%;background:${color}"></div></div>
+          <span class="ms-pct" style="color:${color}">${s.avg}%</span>
+        </div>
+      `;
+    });
+    // Animate bars
+    setTimeout(() => {
+      document.querySelectorAll('.ms-fill').forEach(el => {
+        el.style.width = el.style.width;
+      });
+    }, 100);
+  }
+
+  // History
+  const histEl = document.getElementById('history');
+  if (!exams.length) {
+    histEl.innerHTML = '<div class="empty-state"><div class="empty-icon">🎯</div>Aucun examen passé<br>Lance ton premier QCM !</div>';
+  } else {
+    histEl.innerHTML = exams.map(e => {
+      const color = getColor(e.score);
+      return `
+        <div class="hist-item">
+          <div class="hist-left">
+            <div class="hist-score" style="color:${color}">${e.score}%</div>
+            <div class="hist-detail">
+              ✅ ${e.correct} correctes &nbsp; ❌ ${e.wrong} faux &nbsp; ⏭ ${e.skipped} passées<br>
+              Total : ${e.total} questions
+            </div>
+          </div>
+          <div class="hist-date">${e.date}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Advice
+  const advEl = document.getElementById('advice');
+  const advices = [];
+
+  if (!exams.length) {
+    advices.push({icon:'🚀',title:'Lance ton premier examen !',desc:'Va dans la section Examen et teste-toi sur tous les modules.'});
+  } else {
+    if (avgScore < 60) advices.push({icon:'📚',title:'Revois les fondamentaux',desc:'Score moyen sous 60%. Recommence sur un seul module à la fois avec le niveau Facile.'});
+    if (avgScore >= 80) advices.push({icon:'🏆',title:'Excellent niveau !',desc:'Passe aux questions Difficiles et explore la Checklist DevOps.'});
+
+    const weakMods = Object.entries(modStats).filter(([,s])=>s.avg<60).map(([m])=>m);
+    if (weakMods.length) advices.push({icon:'⚠️',title:`Modules à retravailler : ${weakMods.join(', ')}`,desc:'Lance un examen ciblé sur ces modules uniquement avec plus de temps par question.'});
+
+    const strongMods = Object.entries(modStats).filter(([,s])=>s.avg>=80).map(([m])=>m);
+    if (strongMods.length) advices.push({icon:'✅',title:`Points forts : ${strongMods.join(', ')}`,desc:'Ces modules sont maîtrisés. Concentre-toi sur les points faibles.'});
+  }
+
+  if (doneChecks < 10) advices.push({icon:'📋',title:'Complète ta checklist',desc:`${doneChecks}/${allChecks} compétences validées. La checklist te guide vers le DevOps Cloud.`});
+  if (doneChecks >= 10 && doneChecks < 20) advices.push({icon:'🔥',title:'Tu progresses bien !',desc:'Continue la checklist — les modules Cloud et DevOps t\'ouvriront les portes de l\'alternance.'});
+
+  advices.push({icon:'🎯',title:'Prochain objectif concret',desc:'Ouvre un compte AWS gratuit (Free Tier) et déploie ta première VM EC2. Ça prend 30 minutes.'});
+
+  advEl.innerHTML = advices.map(a=>`
+    <div class="advice-item">
+      <div class="advice-icon">${a.icon}</div>
+      <div class="advice-text"><strong>${a.title}</strong><span>${a.desc}</span></div>
+    </div>
+  `).join('');
+}
+
+function resetData() {
+  if (!confirm('Effacer tout l\'historique des examens ? (La checklist est conservée)')) return;
+  const data = Storage.get();
+  data.exams = [];
+  Storage.save(data);
+  init();
+}
+
+init();
+</script>
+</body>
+</html>

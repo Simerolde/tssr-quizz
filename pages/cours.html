@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiches de cours | TSSR → DevOps</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/global.css">
+<style>
+  .page-header { padding: 2rem 0 1.5rem; }
+  .page-header h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.3rem; }
+  .page-header p { color: var(--muted); font-family: var(--mono); font-size: 0.8rem; }
+
+  .tab-bar {
+    display: flex; gap: 0.4rem; flex-wrap: wrap;
+    margin-bottom: 2rem; padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab-btn {
+    font-family: var(--mono); font-size: 0.75rem;
+    padding: 0.45rem 0.9rem; border-radius: 5px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--muted); cursor: pointer; transition: all 0.15s;
+  }
+  .tab-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .tab-btn.active { background: rgba(0,212,255,0.1); border-color: var(--accent); color: var(--accent); }
+
+  .fiche { display: none; animation: fadeIn 0.4s ease; }
+  .fiche.active { display: block; }
+
+  .fiche-header {
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .fiche-icon { font-size: 2.5rem; }
+  .fiche-title { font-size: 1.6rem; font-weight: 800; }
+  .fiche-sub { color: var(--muted); font-family: var(--mono); font-size: 0.78rem; margin-top: 0.2rem; }
+
+  .cours-section { margin-bottom: 2rem; }
+  .cs-title {
+    font-size: 1rem; font-weight: 700; margin-bottom: 0.75rem;
+    padding: 0.5rem 0.75rem; border-left: 3px solid var(--accent);
+    background: rgba(0,212,255,0.04); border-radius: 0 4px 4px 0;
+  }
+  .cs-content { font-size: 0.88rem; line-height: 1.8; color: var(--text); }
+  .cs-content ul { list-style: none; padding: 0; }
+  .cs-content ul li { padding: 0.2rem 0 0.2rem 1.2rem; position: relative; }
+  .cs-content ul li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-family: var(--mono); }
+
+  .retenir-box {
+    background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1rem;
+  }
+  .retenir-title { font-family: var(--mono); font-size: 0.7rem; color: var(--green); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+
+  .table-cours {
+    width: 100%; border-collapse: collapse; font-size: 0.83rem;
+    margin: 0.75rem 0;
+  }
+  .table-cours th {
+    background: var(--surface2); font-family: var(--mono); font-size: 0.7rem;
+    text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+    padding: 0.6rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border);
+  }
+  .table-cours td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .table-cours tr:last-child td { border-bottom: none; }
+  .table-cours .mono { font-family: var(--mono); font-size: 0.78rem; color: #93c5fd; }
+
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">TSSR<span>→</span>DevOps</a>
+    <div class="nav-links">
+      <a href="../index.html">Accueil</a>
+      <a href="examen.html">Examen</a>
+      <a href="cours.html" class="active">Cours</a>
+      <a href="checklist.html">Checklist</a>
+      <a href="tableau.html">Tableau de bord</a>
+    </div>
+    <button class="nav-burger" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-header">
+    <h1>📚 Fiches de cours</h1>
+    <p>// Résumés structurés des modules TSSR — l'essentiel à connaître pour l'examen</p>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('reseaux')">🌐 Réseaux</button>
+    <button class="tab-btn" onclick="showTab('systemes')">🖥️ Systèmes</button>
+    <button class="tab-btn" onclick="showTab('securite')">🔐 Sécurité</button>
+    <button class="tab-btn" onclick="showTab('virtualisation')">☁️ Virtualisation</button>
+    <button class="tab-btn" onclick="showTab('protocoles')">📡 Protocoles</button>
+    <button class="tab-btn" onclick="showTab('infra')">🔧 Infrastructure</button>
+  </div>
+
+  <!-- ===== RÉSEAUX ===== -->
+  <div class="fiche active" id="fiche-reseaux">
+    <div class="fiche-header">
+      <span class="fiche-icon">🌐</span>
+      <div><div class="fiche-title">Réseaux</div><div class="fiche-sub">Adressage IP · Switching · Routage · VLAN</div></div>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">Le modèle OSI — 7 couches</div>
+      <table class="table-cours">
+        <tr><th>#</th><th>Couche</th><th>Rôle</th><th>Protocoles/équipements</th></tr>
+        <tr><td>7</td><td>Application</td><td>Interface utilisateur</td><td class="mono">HTTP, FTP, DNS, SMTP</td></tr>
+        <tr><td>6</td><td>Présentation</td><td>Format, chiffrement</td><td class="mono">SSL/TLS, JPEG, ASCII</td></tr>
+        <tr><td>5</td><td>Session</td><td>Gestion des sessions</td><td class="mono">NetBIOS, RPC, SMB</td></tr>
+        <tr><td>4</td><td>Transport</td><td>Fiabilité, ports</td><td class="mono">TCP, UDP</td></tr>
+        <tr><td>3</td><td>Réseau</td><td>Routage IP</td><td class="mono">IP, ICMP, OSPF — Routeur</td></tr>
+        <tr><td>2</td><td>Liaison</td><td>Trames, MAC</td><td class="mono">Ethernet, ARP — Switch</td></tr>
+        <tr><td>1</td><td>Physique</td><td>Signal, câbles</td><td class="mono">RJ45, fibre — Hub</td></tr>
+      </table>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">Adressage IPv4 — Calcul rapide</div>
+      <table class="table-cours">
+        <tr><th>Masque CIDR</th><th>Masque décimal</th><th>Hôtes utilisables</th><th>Réseaux /24</th></tr>
+        <tr><td class="mono">/24</td><td class="mono">255.255.255.0</td><td>254</td><td>1</td></tr>
+        <tr><td class="mono">/25</td><td class="mono">255.255.255.128</td><td>126</td><td>2</td></tr>
+        <tr><td class="mono">/26</td><td class="mono">255.255.255.192</td><td>62</td><td>4</td></tr>
+        <tr><td class="mono">/27</td><td class="mono">255.255.255.224</td><td>30</td><td>8</td></tr>
+        <tr><td class="mono">/28</td><td class="mono">255.255.255.240</td><td>14</td><td>16</td></tr>
+        <tr><td class="mono">/30</td><td class="mono">255.255.255.252</td><td>2</td><td>64</td></tr>
+      </table>
+      <div class="cs-content">Formule : hôtes = 2ⁿ − 2 (n = bits hôtes). Plages privées RFC 1918 : <code style="font-family:var(--mono);color:#93c5fd">10.0.0.0/8 · 172.16.0.0/12 · 192.168.0.0/16</code></div>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">Switching — Fonctionnement</div>
+      <div class="cs-content">
+        <ul>
+          <li>Le switch apprend les adresses MAC en mémorisant le port source de chaque trame → <strong>Table CAM</strong></li>
+          <li>Si MAC de destination inconnue → <strong>flooding</strong> sur tous les ports du VLAN</li>
+          <li>Si MAC de destination connue → <strong>unicast</strong> vers le port correspondant</li>
+          <li><strong>STP (802.1D)</strong> : élit un Root Bridge, bloque les ports redondants pour éviter les boucles</li>
+          <li><strong>RSTP (802.1w)</strong> : version rapide de STP, convergence en ~2s vs 30-50s</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">VLANs — Configuration Cisco</div>
+      <div class="code-block">! Créer VLAN et nommer
+Switch(config)# vlan 10
+Switch(config-vlan)# name ADMIN
+
+! Port en mode access (un seul VLAN)
+Switch(config)# interface fa0/1
+Switch(config-if)# switchport mode access
+Switch(config-if)# switchport access vlan 10
+
+! Port en mode trunk (plusieurs VLANs)
+Switch(config)# interface gi0/1
+Switch(config-if)# switchport mode trunk
+Switch(config-if)# switchport trunk allowed vlan 10,20,30</div>
+    </div>
+
+    <div class="retenir-box">
+      <div class="retenir-title">⭐ À retenir absolument</div>
+      <div class="cs-content">
+        <ul>
+          <li>Hub = <strong>couche 1</strong>, Switch = <strong>couche 2 (MAC)</strong>, Routeur = <strong>couche 3 (IP)</strong></li>
+          <li>ARP résout IP → MAC · DNS résout nom → IP</li>
+          <li>Masque /24 = 254 hôtes · /26 = 62 hôtes · /27 = 30 hôtes</li>
+          <li>VLAN natif sur trunk Cisco = VLAN 1 (non tagué par défaut)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SYSTÈMES ===== -->
+  <div class="fiche" id="fiche-systemes">
+    <div class="fiche-header">
+      <span class="fiche-icon">🖥️</span>
+      <div><div class="fiche-title">Systèmes</div><div class="fiche-sub">Linux · Windows Server · Active Directory · GPO</div></div>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">Commandes Linux essentielles</div>
+      <table class="table-cours">
+        <tr><th>Commande</th><th>Usage</th><th>Exemple</th></tr>
+        <tr><td class="mono">ls -la</td><td>Lister fichiers (avec droits)</td><td class="mono">ls -la /etc/</td></tr>
+        <tr><td class="mono">chmod 755</td><td>Changer permissions</td><td class="mono">chmod 755 script.sh</td></tr>
+        <tr><td class="mono">chown user:grp</td><td>Changer propriétaire</td><td class="mono">chown www:www index.html</td></tr>
+        <tr><td class="mono">df -h</td><td>Espace disque</td><td class="mono">df -h /home</td></tr>
+        <tr><td class="mono">top / htop</td><td>Processus temps réel</td><td class="mono">htop</td></tr>
+        <tr><td class="mono">grep -r</td><td>Rechercher dans fichiers</td><td class="mono">grep -r ERROR /var/log/</td></tr>
+        <tr><td class="mono">systemctl</td><td>Gérer les services</td><td class="mono">systemctl status nginx</td></tr>
+        <tr><td class="mono">ss -tuln</td><td>Ports en écoute</td><td class="mono">ss -tuln</td></tr>
+        <tr><td class="mono">tail -f</td><td>Suivre un log</td><td class="mono">tail -f /var/log/syslog</td></tr>
+        <tr><td class="mono">crontab -e</td><td>Tâches planifiées</td><td class="mono">crontab -e</td></tr>
+      </table>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">Permissions Linux — Notation octale</div>
+      <div class="code-block">Propriétaire  Groupe  Autres
+    rwx       r-x     r--
+    7         5       4
+
+r = 4 · w = 2 · x = 1
+777 = rwxrwxrwx (dangereux !)
+755 = rwxr-xr-x (standard pour dossiers)
+644 = rw-r--r-- (standard pour fichiers)
+600 = rw------- (clés SSH, configs sensibles)</div>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">Active Directory — Structure</div>
+      <div class="cs-content">
+        <ul>
+          <li><strong>Forêt</strong> → <strong>Domaine(s)</strong> → <strong>Unités d'Organisation (OU)</strong> → <strong>Objets</strong> (users, groups, machines)</li>
+          <li><strong>GPO</strong> : appliqué dans l'ordre LSDOU (Local → Site → Domain → OU). Le dernier appliqué gagne</li>
+          <li><strong>Kerberos</strong> : protocole d'authentification AD. Ticket TGT → Ticket de service</li>
+          <li><strong>FSMO</strong> : 5 rôles maîtres d'opérations — PDC Emulator, RID Master, Infrastructure Master, Schema Master, Domain Naming Master</li>
+          <li>Outils : <code style="font-family:var(--mono);color:#93c5fd">dsa.msc</code> (Users & Computers) · <code style="font-family:var(--mono);color:#93c5fd">gpmc.msc</code> (Group Policy) · <code style="font-family:var(--mono);color:#93c5fd">dcpromo</code> (promotion DC)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="retenir-box">
+      <div class="retenir-title">⭐ À retenir absolument</div>
+      <div class="cs-content"><ul>
+        <li>/etc/passwd = infos compte (lisible tous) · /etc/shadow = hashs mdp (root uniquement)</li>
+        <li>systemd : enable = démarrage auto · start = lancer maintenant · --now = les deux</li>
+        <li>GPO order : Local → Site → Domaine → OU (le plus spécifique l'emporte)</li>
+        <li>Kerberos : tolérance d'horloge 5 min max (NTP critique en AD)</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- ===== SÉCURITÉ ===== -->
+  <div class="fiche" id="fiche-securite">
+    <div class="fiche-header">
+      <span class="fiche-icon">🔐</span>
+      <div><div class="fiche-title">Sécurité</div><div class="fiche-sub">Menaces · Firewall · VPN · Chiffrement</div></div>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">Types de menaces — À connaître</div>
+      <table class="table-cours">
+        <tr><th>Menace</th><th>Description</th><th>Contremesure</th></tr>
+        <tr><td>Virus</td><td>Se propage via fichier hôte</td><td>Antivirus, scan</td></tr>
+        <tr><td>Ver (Worm)</td><td>Se réplique seul sur réseau</td><td>Patch, segmentation</td></tr>
+        <tr><td>Ransomware</td><td>Chiffre les fichiers, demande rançon</td><td>Backup 3-2-1, EDR</td></tr>
+        <tr><td>Phishing</td><td>Usurpe identité pour voler des infos</td><td>Formation, SPF/DKIM</td></tr>
+        <tr><td>MitM</td><td>Interception des communications</td><td>TLS, HSTS, certificates</td></tr>
+        <tr><td>DDoS</td><td>Saturation par botnet</td><td>CDN, rate limiting, WAF</td></tr>
+        <tr><td>SQL Injection</td><td>Injection dans requêtes BDD</td><td>Paramétrage, WAF</td></tr>
+        <tr><td>Social Engineering</td><td>Manipulation humaine</td><td>Formation, processus</td></tr>
+      </table>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">Firewall — Règles iptables Linux</div>
+      <div class="code-block"># Voir les règles actuelles
+iptables -L -v -n
+
+# Bloquer une IP
+iptables -A INPUT -s 192.168.1.100 -j DROP
+
+# Autoriser SSH depuis un réseau
+iptables -A INPUT -p tcp --dport 22 -s 10.0.0.0/8 -j ACCEPT
+
+# Autoriser HTTP/HTTPS
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+
+# Bloquer tout le reste en entrée
+iptables -A INPUT -j DROP
+
+# Sauvegarder (Debian/Ubuntu)
+iptables-save > /etc/iptables/rules.v4</div>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">Chiffrement — Concepts clés</div>
+      <div class="cs-content"><ul>
+        <li><strong>Symétrique</strong> : même clé pour chiffrer et déchiffrer (AES-256). Rapide. Problème = échange de clé</li>
+        <li><strong>Asymétrique</strong> : clé publique (chiffre) + clé privée (déchiffre). RSA, Ed25519. Lent mais sécurise l'échange</li>
+        <li><strong>TLS</strong> : combine asymétrique (handshake + échange clé session) + symétrique (données). Best of both worlds</li>
+        <li><strong>Hash</strong> : SHA-256, bcrypt. Irréversible. Utilisé pour mots de passe, intégrité</li>
+        <li><strong>PKI</strong> : infrastructure de gestion de certificats. CA (Certificate Authority) signe les certificats</li>
+      </ul></div>
+    </div>
+
+    <div class="retenir-box">
+      <div class="retenir-title">⭐ À retenir absolument</div>
+      <div class="cs-content"><ul>
+        <li>IDS = passif (détecte + alerte) · IPS = actif (détecte + bloque)</li>
+        <li>HTTP = 80 · HTTPS = 443 · SSH = 22 · RDP = 3389 · DNS = 53 · DHCP = 67/68</li>
+        <li>Principe du moindre privilège : ne donner que les droits strictement nécessaires</li>
+        <li>2FA = quelque chose qu'on SAIT + quelque chose qu'on POSSÈDE (ou biométrie)</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- ===== VIRTUALISATION ===== -->
+  <div class="fiche" id="fiche-virtualisation">
+    <div class="fiche-header">
+      <span class="fiche-icon">☁️</span>
+      <div><div class="fiche-title">Virtualisation & Cloud</div><div class="fiche-sub">VM · Docker · Kubernetes · IaaS/PaaS/SaaS</div></div>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">VM vs Conteneurs — Comparaison</div>
+      <table class="table-cours">
+        <tr><th>Critère</th><th>Machine Virtuelle</th><th>Conteneur Docker</th></tr>
+        <tr><td>Isolation</td><td>OS complet isolé</td><td>Namespaces/cgroups Linux</td></tr>
+        <tr><td>Taille</td><td>~Go (OS inclus)</td><td>~Mo (partage kernel)</td></tr>
+        <tr><td>Démarrage</td><td>Minutes</td><td>Secondes</td></tr>
+        <tr><td>Hyperviseur</td><td>Requis (Type 1 ou 2)</td><td>Docker Engine</td></tr>
+        <tr><td>Sécurité</td><td>Meilleure isolation</td><td>Moindre (kernel partagé)</td></tr>
+        <tr><td>Usage</td><td>OS multiples, legacy</td><td>Microservices, CI/CD</td></tr>
+      </table>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">Docker — Commandes essentielles</div>
+      <div class="code-block"># Télécharger une image
+docker pull nginx:latest
+
+# Lancer un conteneur
+docker run -d -p 80:80 --name monsite nginx
+
+# Lister les conteneurs actifs
+docker ps
+
+# Voir les logs
+docker logs monsite
+
+# Entrer dans le conteneur
+docker exec -it monsite bash
+
+# Stopper et supprimer
+docker stop monsite && docker rm monsite
+
+# Docker Compose — lancer plusieurs services
+docker compose up -d
+docker compose down</div>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">Modèles Cloud — IaaS / PaaS / SaaS</div>
+      <table class="table-cours">
+        <tr><th>Modèle</th><th>Fournisseur gère</th><th>Client gère</th><th>Exemples</th></tr>
+        <tr><td class="mono">IaaS</td><td>Matériel, réseau, stockage</td><td>OS, middleware, apps, données</td><td>AWS EC2, Azure VMs, GCP</td></tr>
+        <tr><td class="mono">PaaS</td><td>+ OS + middleware + runtime</td><td>Applications, données</td><td>Heroku, App Service, Cloud Run</td></tr>
+        <tr><td class="mono">SaaS</td><td>Tout</td><td>Données uniquement</td><td>Gmail, Salesforce, Office 365</td></tr>
+      </table>
+    </div>
+
+    <div class="retenir-box">
+      <div class="retenir-title">⭐ À retenir absolument</div>
+      <div class="cs-content"><ul>
+        <li>Hyperviseur Type 1 = bare-metal (ESXi, Proxmox) · Type 2 = sur OS (VirtualBox)</li>
+        <li>RAID 0 = perfs, RAID 1 = miroir, RAID 5 = parité (3 disques min), RAID 10 = miroir+perfs</li>
+        <li>Docker -d = background · -p HOST:CONTENEUR · -v = volume · --name = identifiant</li>
+        <li>Kubernetes = orchestrateur de conteneurs. Pod = unité de base</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- ===== PROTOCOLES ===== -->
+  <div class="fiche" id="fiche-protocoles">
+    <div class="fiche-header">
+      <span class="fiche-icon">📡</span>
+      <div><div class="fiche-title">Protocoles réseau</div><div class="fiche-sub">DHCP · DNS · TCP/UDP · SSH · SNMP · NTP</div></div>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">Ports à connaître absolument</div>
+      <table class="table-cours">
+        <tr><th>Port</th><th>Protocole</th><th>Usage</th></tr>
+        <tr><td class="mono">20/21</td><td>FTP</td><td>Transfert de fichiers (non chiffré)</td></tr>
+        <tr><td class="mono">22</td><td>SSH / SFTP / SCP</td><td>Accès distant sécurisé</td></tr>
+        <tr><td class="mono">23</td><td>Telnet</td><td>Accès distant non chiffré (obsolète)</td></tr>
+        <tr><td class="mono">25 / 587</td><td>SMTP / SMTP TLS</td><td>Envoi d'emails</td></tr>
+        <tr><td class="mono">53</td><td>DNS</td><td>Résolution de noms (UDP + TCP)</td></tr>
+        <tr><td class="mono">67/68</td><td>DHCP</td><td>Attribution IPs (serveur/client)</td></tr>
+        <tr><td class="mono">80 / 443</td><td>HTTP / HTTPS</td><td>Web non chiffré / chiffré</td></tr>
+        <tr><td class="mono">110 / 995</td><td>POP3 / POP3S</td><td>Récupération emails</td></tr>
+        <tr><td class="mono">143 / 993</td><td>IMAP / IMAPS</td><td>Synchro emails (reste sur serveur)</td></tr>
+        <tr><td class="mono">161/162</td><td>SNMP</td><td>Supervision réseau (agent/trap)</td></tr>
+        <tr><td class="mono">389 / 636</td><td>LDAP / LDAPS</td><td>Annuaire (Active Directory)</td></tr>
+        <tr><td class="mono">3389</td><td>RDP</td><td>Bureau distant Windows</td></tr>
+        <tr><td class="mono">123</td><td>NTP</td><td>Synchronisation de l'heure</td></tr>
+      </table>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">DHCP — Processus DORA</div>
+      <div class="code-block">Client          Serveur DHCP
+  |---DISCOVER-->|  (broadcast : "Y a-t-il un serveur DHCP ?")
+  |<---OFFER-----|  (unicast : "Je t'offre 192.168.1.50/24")
+  |---REQUEST---->|  (broadcast : "Je veux l'IP proposée")
+  |<---ACK--------|  (unicast : "C'est accordé, bail = 24h")</div>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">DNS — Types d'enregistrements</div>
+      <table class="table-cours">
+        <tr><th>Type</th><th>Usage</th><th>Exemple</th></tr>
+        <tr><td class="mono">A</td><td>Nom → IPv4</td><td class="mono">www → 93.184.216.34</td></tr>
+        <tr><td class="mono">AAAA</td><td>Nom → IPv6</td><td class="mono">www → 2001:db8::1</td></tr>
+        <tr><td class="mono">CNAME</td><td>Alias</td><td class="mono">mail → smtp.exemple.fr</td></tr>
+        <tr><td class="mono">MX</td><td>Serveur mail du domaine</td><td class="mono">exemple.fr → mail.exemple.fr</td></tr>
+        <tr><td class="mono">TXT</td><td>Vérification, SPF, DKIM</td><td class="mono">v=spf1 include:...</td></tr>
+        <tr><td class="mono">PTR</td><td>IP → Nom (résolution inverse)</td><td class="mono">34.216.184.93 → www</td></tr>
+      </table>
+    </div>
+
+    <div class="retenir-box">
+      <div class="retenir-title">⭐ À retenir absolument</div>
+      <div class="cs-content"><ul>
+        <li>TCP = connexion orientée (3-way handshake SYN/SYN-ACK/ACK), fiable</li>
+        <li>UDP = sans connexion, rapide mais sans garantie. DNS, DHCP, SNMP, VoIP, streaming</li>
+        <li>NTP critique pour Kerberos/AD : tolérance max 5 minutes</li>
+        <li>IMAP (143) = emails restent sur serveur · POP3 (110) = télécharge et supprime</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- ===== INFRASTRUCTURE ===== -->
+  <div class="fiche" id="fiche-infra">
+    <div class="fiche-header">
+      <span class="fiche-icon">🔧</span>
+      <div><div class="fiche-title">Infrastructure</div><div class="fiche-sub">Câblage · Normes · VLAN · Fibre · PoE</div></div>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">Câblage cuivré — Catégories et performances</div>
+      <table class="table-cours">
+        <tr><th>Catégorie</th><th>Débit max</th><th>Distance max</th><th>Usage</th></tr>
+        <tr><td class="mono">Cat5e</td><td>1 Gbps</td><td>100m</td><td>Réseau standard</td></tr>
+        <tr><td class="mono">Cat6</td><td>1 Gbps / 10 Gbps*</td><td>100m / 55m</td><td>Réseau entreprise</td></tr>
+        <tr><td class="mono">Cat6a</td><td>10 Gbps</td><td>100m</td><td>Datacenter, campus</td></tr>
+        <tr><td class="mono">Cat7</td><td>10 Gbps</td><td>100m</td><td>Haute performance</td></tr>
+        <tr><td class="mono">Cat8</td><td>25/40 Gbps</td><td>30m</td><td>Datacenter (short range)</td></tr>
+      </table>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">Fibre optique — Monomode vs Multimode</div>
+      <table class="table-cours">
+        <tr><th></th><th>Monomode (SMF)</th><th>Multimode (MMF)</th></tr>
+        <tr><td>Cœur</td><td>9 µm</td><td>50 / 62.5 µm</td></tr>
+        <tr><td>Portée</td><td>Jusqu'à 100 km</td><td>300 m – 2 km</td></tr>
+        <tr><td>Source lumineuse</td><td>Laser</td><td>LED ou VCSEL</td></tr>
+        <tr><td>Coût</td><td>Plus cher</td><td>Moins cher</td></tr>
+        <tr><td>Usage</td><td>WAN, FAI, inter-bâtiments</td><td>Datacenter, campus</td></tr>
+        <tr><td>Connecteurs</td><td>SC, LC, FC</td><td>SC, LC, ST</td></tr>
+      </table>
+    </div>
+
+    <div class="cours-section">
+      <div class="cs-title">PoE — Power over Ethernet</div>
+      <div class="cs-content"><ul>
+        <li><strong>PoE (802.3af)</strong> : 15.4W max → téléphones IP, petites caméras</li>
+        <li><strong>PoE+ (802.3at)</strong> : 30W max → points d'accès WiFi, caméras PTZ</li>
+        <li><strong>PoE++ (802.3bt)</strong> : 60W / 100W → téléphones conférence, mini-PC</li>
+        <li>Le switch PoE doit avoir un budget PoE total suffisant (somme de tous les ports)</li>
+        <li>L'injecteur PoE permet d'alimenter un équipement depuis un switch non-PoE</li>
+      </ul></div>
+    </div>
+
+    <div class="retenir-box">
+      <div class="retenir-title">⭐ À retenir absolument</div>
+      <div class="cs-content"><ul>
+        <li>Distance max Ethernet cuivré = <strong>100 mètres</strong> (toutes catégories pour 1 Gbps)</li>
+        <li>Câble droit = équipements différents (PC→Switch) · Croisé = équipements identiques (Switch→Switch)</li>
+        <li>Auto-MDIX sur les équipements modernes détecte automatiquement le type de câble</li>
+        <li>VLAN 802.1Q : tag de 4 octets ajouté à la trame Ethernet, ID VLAN sur 12 bits (4094 VLANs)</li>
+      </ul></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.fiche').forEach(f => f.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('fiche-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
