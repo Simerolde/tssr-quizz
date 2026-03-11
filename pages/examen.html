@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Examen TSSR | QCM</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/global.css">
+<style>
+  /* MENU */
+  .page-header { padding: 2rem 0 1.5rem; }
+  .page-header h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.3rem; }
+  .page-header p { color: var(--muted); font-family: var(--mono); font-size: 0.8rem; }
+
+  .all-btn {
+    font-family: var(--mono); font-size: 0.72rem;
+    color: var(--accent); background: transparent;
+    border: 1px solid rgba(0,212,255,0.3);
+    padding: 0.4rem 0.9rem; border-radius: 4px;
+    cursor: pointer; margin-bottom: 1rem;
+    transition: all 0.2s;
+  }
+  .all-btn:hover { background: rgba(0,212,255,0.08); }
+
+  .modules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 0.85rem; margin-bottom: 1.5rem; }
+
+  .mod-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.2rem;
+    cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
+  }
+  .mod-card.selected { border-color: var(--accent); background: rgba(0,212,255,0.04); }
+  .mod-card:hover { border-color: rgba(0,212,255,0.5); transform: translateY(-2px); }
+  .mod-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
+  .mod-icon { font-size: 1.6rem; }
+  .mod-q-count { font-family: var(--mono); font-size: 0.65rem; color: var(--accent); background: rgba(0,212,255,0.1); padding: 0.2rem 0.45rem; border-radius: 3px; }
+  .mod-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.2rem; }
+  .mod-topics { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); }
+
+  .config-row { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .config-box { flex:1; min-width: 160px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; }
+  .config-lbl { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+  select, input[type="range"] { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 0.45rem; border-radius: 4px; font-family: var(--mono); font-size: 0.82rem; cursor: pointer; }
+  input[type="range"] { padding: 0.2rem 0; accent-color: var(--accent); }
+  .range-val { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); margin-top: 0.3rem; }
+
+  .btn-launch {
+    display: block; width: 100%; padding: 1.1rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; border-radius: 8px; color: white;
+    font-family: var(--sans); font-size: 1rem; font-weight: 800;
+    cursor: pointer; letter-spacing: 0.05em;
+    transition: all 0.2s; text-transform: uppercase;
+  }
+  .btn-launch:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,212,255,0.3); }
+
+  /* EXAM */
+  #exam-screen { display: none; }
+  .exam-top {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap;
+  }
+  .progress-wrap { flex: 1; min-width: 200px; }
+  .prog-info { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); margin-bottom: 0.4rem; }
+  .prog-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .prog-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width 0.4s ease; }
+  .score-live { font-family: var(--mono); font-size: 0.75rem; display: flex; gap: 1rem; align-items: center; }
+  .s-c { color: var(--green); } .s-w { color: var(--red); }
+
+  .timer {
+    font-family: var(--mono); font-size: 1.5rem; font-weight: 700; color: var(--accent);
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 0.4rem 0.9rem; border-radius: 6px; min-width: 70px; text-align: center;
+    transition: color 0.3s, border-color 0.3s;
+  }
+  .timer.warn { color: var(--orange); border-color: var(--orange); }
+  .timer.danger { color: var(--red); border-color: var(--red); animation: pulse 0.5s infinite alternate; }
+  @keyframes pulse { to { opacity: 0.55; } }
+
+  .q-meta { display: flex; gap: 0.4rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+
+  .q-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.75rem; margin-bottom: 1.25rem; }
+  .q-num { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); margin-bottom: 0.6rem; }
+  .q-text { font-size: 1.05rem; font-weight: 600; line-height: 1.65; margin-bottom: 1.25rem; }
+  .answers { display: grid; gap: 0.65rem; }
+  .ans-btn {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.9rem 1.1rem; cursor: pointer; text-align: left;
+    transition: all 0.15s; color: var(--text); font-family: var(--sans);
+    font-size: 0.88rem; line-height: 1.45;
+  }
+  .ans-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(0,212,255,0.04); transform: translateX(3px); }
+  .ans-btn:disabled { cursor: default; }
+  .ans-letter {
+    font-family: var(--mono); font-size: 0.75rem; color: var(--accent);
+    background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 3px; width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .ans-btn.correct { border-color: var(--green); background: rgba(16,185,129,0.08); }
+  .ans-btn.correct .ans-letter { color: var(--green); background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.35); }
+  .ans-btn.wrong { border-color: var(--red); background: rgba(239,68,68,0.08); }
+  .ans-btn.wrong .ans-letter { color: var(--red); background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.35); }
+
+  .expl-box {
+    margin-top: 0.85rem; padding: 0.9rem 1rem;
+    background: rgba(0,212,255,0.04); border: 1px solid rgba(0,212,255,0.18);
+    border-radius: 6px; font-family: var(--mono); font-size: 0.78rem;
+    line-height: 1.7; color: #93c5fd; display: none;
+  }
+  .expl-box.show { display: block; animation: fadeIn 0.3s ease; }
+
+  .exam-nav { display: flex; gap: 1rem; justify-content: flex-end; }
+
+  /* RESULTS */
+  #result-screen { display: none; animation: fadeIn 0.5s ease; }
+  .result-header { text-align: center; padding: 2rem 0; }
+  .score-big { font-family: var(--mono); font-size: 4rem; font-weight: 700; color: var(--accent); line-height: 1; }
+  .score-label { font-size: 0.8rem; color: var(--muted); font-family: var(--mono); margin-top: 0.3rem; }
+  .verdict-text { font-size: 1.4rem; font-weight: 800; margin: 1rem 0 0.3rem; }
+  .verdict-sub { color: var(--muted); font-family: var(--mono); font-size: 0.8rem; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin: 1.5rem 0; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: center; }
+  .stat-v { font-family: var(--mono); font-size: 1.8rem; font-weight: 700; }
+  .stat-k { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+  .module-result-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+  .mod-result-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; }
+  .mod-res-name { font-size: 0.82rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .mod-res-bar { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; margin-bottom: 0.3rem; }
+  .mod-res-fill { height: 100%; border-radius: 3px; }
+  .mod-res-pct { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+
+  .review-section { margin-bottom: 2rem; }
+  .review-item {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.9rem 1.1rem; margin-bottom: 0.6rem;
+    display: flex; gap: 0.75rem; align-items: flex-start;
+  }
+  .ri-icon { font-size: 1rem; flex-shrink: 0; margin-top: 2px; }
+  .ri-q { font-size: 0.83rem; font-weight: 600; line-height: 1.4; margin-bottom: 0.25rem; }
+  .ri-ans { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+  .ri-ans .ok { color: var(--green); }
+  .ri-ans .ko { color: var(--red); text-decoration: line-through; }
+
+  .btn-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  @media(max-width:600px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .exam-top { flex-direction: column; }
+    .score-live { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-inner">
+    <a class="nav-logo" href="../index.html">TSSR<span>→</span>DevOps</a>
+    <div class="nav-links">
+      <a href="../index.html">Accueil</a>
+      <a href="examen.html" class="active">Examen</a>
+      <a href="cours.html">Cours</a>
+      <a href="checklist.html">Checklist</a>
+      <a href="tableau.html">Tableau de bord</a>
+    </div>
+    <button class="nav-burger" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
+  </div>
+</nav>
+
+<div class="container">
+
+<!-- =========== MENU =========== -->
+<div id="menu-screen">
+  <div class="page-header">
+    <h1>🎯 Examen TSSR</h1>
+    <p>// Sélectionne tes modules et configure ton examen</p>
+  </div>
+
+  <div style="margin-bottom:0.75rem;">
+    <button class="all-btn" id="all-btn" onclick="toggleAll()">☑ Tout désélectionner</button>
+  </div>
+
+  <div class="modules-grid" id="modules-grid"></div>
+
+  <div class="config-row">
+    <div class="config-box">
+      <div class="config-lbl">// Nombre de questions</div>
+      <input type="range" id="q-count" min="5" max="50" value="20" step="5"
+        oninput="document.getElementById('q-count-val').textContent=this.value">
+      <div class="range-val"><span id="q-count-val">20</span> questions</div>
+    </div>
+    <div class="config-box">
+      <div class="config-lbl">// Temps / question (sec)</div>
+      <input type="range" id="tpq" min="15" max="120" value="45" step="15"
+        oninput="document.getElementById('tpq-val').textContent=this.value">
+      <div class="range-val"><span id="tpq-val">45</span> secondes</div>
+    </div>
+    <div class="config-box">
+      <div class="config-lbl">// Difficulté</div>
+      <select id="diff">
+        <option value="all">Toutes niveaux</option>
+        <option value="easy">Facile</option>
+        <option value="medium">Moyen</option>
+        <option value="hard">Difficile</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="btn-launch" onclick="startExam()">🚀 Lancer l'examen</button>
+</div>
+
+<!-- =========== EXAM =========== -->
+<div id="exam-screen">
+  <div class="exam-top">
+    <div class="progress-wrap">
+      <div class="prog-info">
+        <span id="q-prog">Q1 / 20</span>
+        <span id="module-live"></span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div class="score-live">
+      <span class="s-c">✅ <span id="live-c">0</span></span>
+      <span class="s-w">❌ <span id="live-w">0</span></span>
+    </div>
+    <div class="timer" id="timer">45</div>
+  </div>
+
+  <div class="q-meta" id="q-meta"></div>
+
+  <div class="q-card">
+    <div class="q-num" id="q-num">Q1</div>
+    <div class="q-text" id="q-text"></div>
+    <div class="code-block" id="q-code" style="display:none"></div>
+    <div class="answers" id="answers"></div>
+    <div class="expl-box" id="expl"></div>
+  </div>
+
+  <div class="exam-nav">
+    <button class="btn btn-secondary" onclick="skipQ()">Passer →</button>
+    <button class="btn btn-primary" id="next-btn" style="display:none" onclick="nextQ()">Suivant →</button>
+  </div>
+</div>
+
+<!-- =========== RESULTS =========== -->
+<div id="result-screen">
+  <div class="result-header">
+    <div class="score-big" id="r-pct">0%</div>
+    <div class="score-label">Score final</div>
+    <div class="verdict-text" id="r-verdict"></div>
+    <div class="verdict-sub" id="r-sub"></div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-box"><div class="stat-v" style="color:var(--green)" id="r-correct">0</div><div class="stat-k">Correctes ✅</div></div>
+    <div class="stat-box"><div class="stat-v" style="color:var(--red)" id="r-wrong">0</div><div class="stat-k">Incorrectes ❌</div></div>
+    <div class="stat-box"><div class="stat-v" style="color:var(--orange)" id="r-skip">0</div><div class="stat-k">Passées ⏭</div></div>
+  </div>
+
+  <div class="section-title">// Score par module</div>
+  <div class="module-result-grid" id="mod-results"></div>
+
+  <div class="section-title">// Récapitulatif</div>
+  <div class="review-section" id="review"></div>
+
+  <div class="btn-group">
+    <button class="btn btn-secondary" onclick="showMenu()">← Menu</button>
+    <button class="btn btn-primary" onclick="startExam()">🔄 Recommencer</button>
+    <a href="tableau.html" class="btn btn-secondary">📊 Tableau de bord</a>
+  </div>
+</div>
+
+</div>
+
+<script src="../js/storage.js"></script>
+<script>
+// ============================================================
+// QUESTIONS (60+)
+// ============================================================
+const QUESTIONS = [
+  // === RÉSEAUX ===
+  {module:"Réseaux",diff:"easy",q:"Quel est le rôle principal d'un switch dans un réseau local ?",answers:["Connecter différents réseaux IP","Commuter des trames Ethernet selon l'adresse MAC","Attribuer des adresses IP","Filtrer le trafic firewall"],correct:1,expl:"Le switch opère en couche 2 (liaison). Il achemine les trames selon les adresses MAC via sa table CAM. Contrairement au hub, il envoie la trame uniquement au port destinataire."},
+  {module:"Réseaux",diff:"easy",q:"Quelle est la classe et le masque par défaut du réseau 192.168.10.0 ?",answers:["Classe A — 255.0.0.0","Classe B — 255.255.0.0","Classe C — 255.255.255.0","Classe D — pas de masque"],correct:2,expl:"192.168.x.x est une adresse de Classe C (192–223). Masque /24 = 255.255.255.0. C'est aussi une plage privée RFC 1918 non routable sur Internet."},
+  {module:"Réseaux",diff:"medium",q:"Combien d'hôtes utilisables avec un masque /26 ?",answers:["30","62","126","64"],correct:1,expl:"/26 laisse 6 bits pour les hôtes. 2⁶=64 adresses, moins réseau et broadcast = 62 hôtes utilisables."},
+  {module:"Réseaux",diff:"medium",q:"Quel protocole de routage est à état de liens (Link-State) ?",answers:["RIP v2","EIGRP","OSPF","BGP"],correct:2,expl:"OSPF construit une cartographie complète du réseau via l'algorithme SPF (Dijkstra). RIP = vecteur de distance, EIGRP = hybride, BGP = vecteur de chemin."},
+  {module:"Réseaux",diff:"hard",q:"Quelle commande affiche la table CAM d'un switch Cisco ?",code:"Switch# ___",answers:["show ip arp","show mac address-table","show spanning-tree","show interfaces status"],correct:1,expl:"'show mac address-table' affiche les associations MAC ↔ port ↔ VLAN appris dynamiquement. La table CAM est vidée après un temps d'inactivité configurable (aging time, défaut 300s)."},
+  {module:"Réseaux",diff:"medium",q:"Le protocole STP (Spanning Tree) sert à :",answers:["Chiffrer les trames entre switches","Éviter les boucles dans un réseau commuté redondant","Distribuer les VLAN","Créer des tunnels VPN L2"],correct:1,expl:"STP (IEEE 802.1D) élit un Root Bridge et bloque les ports redondants pour éliminer les boucles. RSTP (802.1w) est sa version accélérée."},
+  {module:"Réseaux",diff:"hard",q:"Adresse broadcast du 3ème sous-réseau en 192.168.5.0/27 ?",answers:["192.168.5.63","192.168.5.95","192.168.5.127","192.168.5.79"],correct:1,expl:"/27 = blocs de 32. S1:0-31, S2:32-63, S3:64-95. Broadcast du S3 = 192.168.5.95."},
+  {module:"Réseaux",diff:"easy",q:"Quel protocole résout une IP en adresse MAC ?",answers:["DNS","DHCP","ARP","ICMP"],correct:2,expl:"ARP (Address Resolution Protocol) diffuse une requête broadcast 'Qui a l'IP x.x.x.x ?' et reçoit une réponse unicast avec l'adresse MAC. La table ARP est mise en cache."},
+  {module:"Réseaux",diff:"medium",q:"Quelle est la différence entre un routeur et un switch de couche 3 ?",answers:["Aucune différence","Le routeur route entre réseaux IP, le switch L3 peut aussi router mais optimise le trafic intra-VLAN via du matériel dédié","Le switch L3 est plus lent","Le routeur ne supporte pas les VLAN"],correct:1,expl:"Les deux routent des paquets IP. Le switch L3 est optimisé pour les environnements haute densité avec du routage matériel (ASIC) — plus rapide en interne. Le routeur classique offre plus de fonctionnalités WAN."},
+  {module:"Réseaux",diff:"hard",q:"Que fait la commande 'ip helper-address' sur un routeur Cisco ?",answers:["Configure une adresse IP secondaire","Redirige les broadcasts UDP (dont DHCP) vers un serveur distant","Active le routage entre VLANs","Configure une route statique"],correct:1,expl:"'ip helper-address X.X.X.X' sur une interface convertit les broadcasts DHCP en unicast vers le serveur DHCP. Essentiel quand le serveur DHCP est sur un réseau différent du client."},
+  {module:"Réseaux",diff:"medium",q:"Qu'est-ce que le Full-Duplex sur une interface réseau ?",answers:["L'interface peut émettre et recevoir simultanément","L'interface ne peut faire qu'une chose à la fois","La vitesse est doublée automatiquement","C'est un type de câblage"],correct:0,expl:"Full-Duplex = émission et réception simultanées. Élimine les collisions (pas besoin de CSMA/CD). Nécessite que les deux extrémités soient configurées en full-duplex — un mismatch crée de la dégradation de performance."},
+  {module:"Réseaux",diff:"easy",q:"Quel est le rôle d'une passerelle par défaut (default gateway) ?",answers:["Résoudre les noms de domaine","Être le prochain saut pour les paquets destinés à d'autres réseaux","Attribuer des adresses IP","Chiffrer les communications"],correct:1,expl:"La passerelle par défaut est l'adresse IP du routeur local. Quand un hôte veut communiquer avec une IP hors de son sous-réseau, il envoie le paquet à sa passerelle qui se charge de le router."},
+
+  // === SYSTÈMES ===
+  {module:"Systèmes",diff:"easy",q:"Quelle commande affiche l'espace disque disponible en lisible sous Linux ?",code:"$ __ -h",answers:["ls -h","df -h","du -h","free -h"],correct:1,expl:"'df -h' (disk free) liste tous les systèmes de fichiers montés avec la taille totale, utilisée et disponible en format human-readable (GB/MB). 'du -h' analyse la taille des répertoires."},
+  {module:"Systèmes",diff:"easy",q:"Commande pour changer les permissions d'un fichier (ex: rwxr-xr-x) ?",answers:["chown 755 fichier","chmod 755 fichier","chgrp 755 fichier","setuid 755 fichier"],correct:1,expl:"chmod (change mode) : 7=rwx (propriétaire), 5=r-x (groupe), 5=r-x (autres). chown = change propriétaire, chgrp = change groupe. En notation symbolique : chmod u+x fichier."},
+  {module:"Systèmes",diff:"medium",q:"Quel rôle Windows Server gère les identités, utilisateurs et GPO ?",answers:["IIS","Active Directory Domain Services (AD DS)","DHCP Server","File Services"],correct:1,expl:"AD DS est l'annuaire Microsoft. Il gère l'authentification Kerberos, les GPO, les OUs, les utilisateurs et groupes dans un domaine. LDAP est le protocole d'accès à l'annuaire."},
+  {module:"Systèmes",diff:"medium",q:"Que fait 'systemctl enable --now nginx' ?",code:"$ systemctl enable --now nginx",answers:["Lance nginx pour la session uniquement","Active nginx au démarrage ET le lance immédiatement","Vérifie l'état de nginx","Désactive nginx"],correct:1,expl:"'enable' crée les liens symboliques systemd pour le démarrage auto. '--now' équivaut à ajouter 'start' dans la même commande. C'est un raccourci pratique introduit dans systemd v220."},
+  {module:"Systèmes",diff:"hard",q:"Que contient /etc/shadow ?",answers:["Les interfaces réseau","Les mots de passe hashés et politiques de compte","Les partitions montées","Les droits sudo"],correct:1,expl:"/etc/shadow contient le hash du mot de passe (algo:sel:hash), la date de dernier changement, min/max jours, avertissement expiration. Lisible uniquement par root. Le hash utilise SHA-512 par défaut sur les systèmes modernes."},
+  {module:"Systèmes",diff:"medium",q:"Qu'est-ce qu'un GPO (Group Policy Object) ?",answers:["Règle de routage réseau","Ensemble de paramètres appliqués aux objets AD (users/machines)","Certificat SSL de l'AD","Log d'événements centralisé"],correct:1,expl:"Les GPO définissent des configurations (sécurité, bureau, logiciels, registre) appliquées automatiquement via l'AD. Gérés via GPMC. Appliqués dans l'ordre : Local > Site > Domaine > OU (LSDOU)."},
+  {module:"Systèmes",diff:"easy",q:"Commande pour afficher les processus en temps réel sous Linux ?",answers:["ps aux","top / htop","jobs -l","lsof"],correct:1,expl:"'top' affiche CPU, RAM, PID des processus en temps réel. 'htop' est sa version colorée et interactive. 'ps aux' donne un snapshot statique. Indispensable pour le diagnostic de performance."},
+  {module:"Systèmes",diff:"medium",q:"Que fait la commande 'grep -r ERROR /var/log/' ?",code:"$ grep -r ERROR /var/log/",answers:["Supprime les fichiers contenant ERROR","Recherche 'ERROR' récursivement dans tous les fichiers de /var/log/","Affiche uniquement le fichier contenant le plus d'erreurs","Renomme les fichiers de log"],correct:1,expl:"grep (Global Regular Expression Print) cherche un pattern dans des fichiers. -r = récursif. Très utilisé pour analyser des logs. Combiné avec 'tail -f /var/log/syslog' pour le monitoring en temps réel."},
+  {module:"Systèmes",diff:"hard",q:"Quelle commande crée un lien symbolique sous Linux ?",code:"$ ln -s /chemin/source /chemin/lien",answers:["cp -l source lien","ln -s source lien","link source lien","mklink source lien"],correct:1,expl:"'ln -s' crée un lien symbolique (raccourci). Sans -s, 'ln' crée un lien dur (hard link). Un lien symbolique pointe vers le chemin, un lien dur partage le même inode. Les liens symboliques peuvent pointer vers des répertoires."},
+  {module:"Systèmes",diff:"medium",q:"Quelle est la différence entre /etc/passwd et /etc/shadow ?",answers:["Ce sont les mêmes fichiers","passwd contient infos compte (lisible), shadow contient les hashs de mots de passe (root only)","shadow est pour les groupes","passwd contient les GPO"],correct:1,expl:"/etc/passwd : lecture par tous, contient UID/GID/home/shell. /etc/shadow : root uniquement, contient le hash du mot de passe. Cette séparation évite que des utilisateurs normaux puissent tenter de cracker les hashs."},
+  {module:"Systèmes",diff:"hard",q:"Que signifie RAID 5 et quel est son minimum de disques ?",answers:["Miroir simple — 2 disques","Parité distribuée — minimum 3 disques","Agrégat sans parité — 2 disques","Double miroir — 4 disques"],correct:1,expl:"RAID 5 distribue les données ET la parité sur tous les disques. Minimum 3 disques. Peut survivre à la perte d'1 disque. Capacité utile = (N-1) × taille d'un disque. Bon équilibre performance/sécurité/capacité."},
+  {module:"Systèmes",diff:"easy",q:"Que fait 'sudo' sous Linux ?",answers:["Ouvre un terminal graphique en root","Exécute une commande avec les privilèges root (ou d'un autre user)","Change définitivement l'utilisateur","Crée un superutilisateur"],correct:1,expl:"'sudo' (Super User DO) permet d'exécuter ponctuellement une commande avec des privilèges élevés. Configuré via /etc/sudoers. Plus sécurisé que de se connecter directement en root."},
+
+  // === SÉCURITÉ ===
+  {module:"Sécurité",diff:"easy",q:"Différence entre un virus et un ver (worm) ?",answers:["Un virus se réplique seul sur le réseau","Un ver se réplique seul via le réseau, le virus nécessite un fichier hôte","Ce sont la même chose","Un virus est plus dangereux par définition"],correct:1,expl:"Virus : s'attache à un fichier, propagation par action humaine. Ver : autonome, se réplique via le réseau sans intervention. Ex: WannaCry (ver exploitant EternalBlue/SMB)."},
+  {module:"Sécurité",diff:"medium",q:"Qu'est-ce qu'une attaque Man-in-the-Middle (MitM) ?",answers:["Attaque par déni de service","Attaquant entre deux parties qui intercepte/modifie les échanges","Force brute sur mot de passe","Injection SQL"],correct:1,expl:"MitM : l'attaquant se positionne entre client et serveur. Techniques : ARP poisoning, SSL stripping, Evil Twin WiFi. Contremesures : TLS/SSL, certificats, HSTS, DNSSEC."},
+  {module:"Sécurité",diff:"easy",q:"Quel port utilise HTTPS par défaut ?",answers:["80","443","8080","8443"],correct:1,expl:"HTTPS (HTTP over TLS/SSL) = port 443/TCP. HTTP = port 80. Les ports 8080/8443 sont des alternatives pour serveurs de dev. Le port 443 est défini par l'IANA."},
+  {module:"Sécurité",diff:"hard",q:"Qu'est-ce qu'un DDoS ?",answers:["Attaque sur une seule machine","Botnet qui inonde simultanément une cible pour la saturer","Injection SQL massive","Vol de données interne"],correct:1,expl:"DDoS (Distributed Denial of Service) : botnet de machines compromises qui inondent la cible. Types : volumétrique (bande passante), protocole (SYN flood), applicatif (HTTP flood). Contremesures : CDN, scrubbing, Anycast, rate limiting."},
+  {module:"Sécurité",diff:"easy",q:"VPN signifie ?",answers:["Virtual Private Node","Virtual Protocol Network","Virtual Private Network","Verified Protected Node"],correct:2,expl:"VPN (Virtual Private Network / Réseau Privé Virtuel) crée un tunnel chiffré sur Internet. Protocoles : OpenVPN, WireGuard, IPSec, L2TP. Usages : accès distant sécurisé, contournement géographique, confidentialité."},
+  {module:"Sécurité",diff:"hard",q:"Différence entre IDS et IPS ?",answers:["IDS chiffre, IPS filtre","IDS détecte et alerte (passif), IPS détecte et bloque (actif)","IDS est matériel, IPS logiciel","Ce sont des synonymes"],correct:1,expl:"IDS = mode passif, analyse et génère des alertes. IPS = inline sur le flux, peut bloquer en temps réel. Un IPS mal configuré peut créer des faux positifs et bloquer du trafic légitime."},
+  {module:"Sécurité",diff:"medium",q:"Qu'est-ce que le phishing ?",answers:["Un type d'attaque réseau par saturation","Une technique d'ingénierie sociale par email/SMS imitant une entité de confiance","Un malware chiffrant les fichiers","Une attaque sur les DNS"],correct:1,expl:"Le phishing trompe la victime via un faux email/SMS/page web imitant une entité légitime (banque, admin IT) pour voler des identifiants ou faire installer un malware. Le spear phishing cible une personne spécifique."},
+  {module:"Sécurité",diff:"hard",q:"Qu'est-ce que le principe du moindre privilège ?",answers:["Ne donner que les droits strictement nécessaires à chaque utilisateur/processus","Bloquer tous les accès par défaut","Utiliser uniquement des comptes admin","Chiffrer toutes les données"],correct:0,expl:"Le principe du moindre privilège (Least Privilege) limite les permissions au strict nécessaire. Réduit la surface d'attaque : si un compte est compromis, les dégâts sont limités. Fondamental en sécurité Zero Trust."},
+  {module:"Sécurité",diff:"medium",q:"Quel protocole sécurise les emails en transit ?",answers:["SMTP seul","TLS/STARTTLS sur SMTP","FTP over SSL","POP3 uniquement"],correct:1,expl:"SMTP seul n'est pas chiffré. TLS ou STARTTLS chiffre la connexion SMTP. Pour la signature et le chiffrement du contenu des emails, on utilise S/MIME ou PGP/GPG."},
+  {module:"Sécurité",diff:"easy",q:"Que signifie 2FA (Two-Factor Authentication) ?",answers:["Deux mots de passe différents","Authentification en deux étapes combinant deux facteurs différents (connaissance + possession/biométrie)","Double chiffrement des données","Deux administrateurs pour valider une action"],correct:1,expl:"2FA combine deux facteurs : connaissance (mot de passe), possession (smartphone/token OTP), ou inhérence (biométrie). Même si le mot de passe est volé, le compte reste protégé."},
+
+  // === VIRTUALISATION & CLOUD ===
+  {module:"Virtualisation",diff:"easy",q:"Différence entre VM et conteneur Docker ?",answers:["Les VM partagent le kernel, plus légères","Les conteneurs partagent le kernel de l'hôte (légers), les VM ont leur propre OS complet (isolées)","Un conteneur nécessite un hyperviseur","Aucune différence architecturale"],correct:1,expl:"VM : hyperviseur virtualise le matériel, chaque VM a son propre OS (~Go). Conteneur : partage le kernel Linux, isolation via namespaces/cgroups (~Mo). Docker démarre en secondes vs minutes pour une VM."},
+  {module:"Virtualisation",diff:"medium",q:"Qu'est-ce qu'un hyperviseur de type 1 (bare-metal) ?",answers:["Installé sur un OS hôte","Installé directement sur le matériel sans OS intermédiaire","Uniquement pour conteneurs","Logiciel de sauvegarde VM"],correct:1,expl:"Type 1 (bare-metal) : ESXi, Hyper-V, KVM, Proxmox — directement sur le matériel, plus performant. Type 2 : VirtualBox, VMware Workstation — sur un OS hôte, plus simple mais moins performant."},
+  {module:"Virtualisation",diff:"medium",q:"Que signifie IaaS dans le cloud ?",answers:["Infrastructure as a Service : fournisseur gère le matériel, client gère OS et apps","Platform as a Service : client gère uniquement le code","Software as a Service : tout géré par le fournisseur","Identity as a Service"],correct:0,expl:"IaaS (AWS EC2, Azure VMs, GCP Compute) : tu loues la machine virtuelle. PaaS (Heroku, App Service) : tu déploies ton code. SaaS (Gmail, Salesforce) : tu utilises l'application. La responsabilité du client diminue de IaaS à SaaS."},
+  {module:"Virtualisation",diff:"hard",q:"Que fait cette commande Docker ?",code:"docker run -d -p 80:8080 --name monapp nginx:latest",answers:["Lance nginx en interactif sur port 8080","Lance nginx en arrière-plan, port 80 hôte → port 8080 conteneur","Télécharge nginx sans lancer","Lance et expose tous les ports"],correct:1,expl:"-d = detached (background). -p HOST:CONTAINER = port mapping. --name = identifiant du conteneur. nginx:latest = image Docker Hub. Pour voir les logs : 'docker logs monapp'. Pour entrer : 'docker exec -it monapp bash'."},
+  {module:"Virtualisation",diff:"easy",q:"Qu'est-ce que le RAID 1 ?",answers:["Agrégat de disques pour performances","Miroir : données dupliquées sur 2 disques","Parité distribuée","Combinaison RAID 0+5"],correct:1,expl:"RAID 1 = mirroring. Données identiques sur 2 disques. Capacité utile = 1 disque. Si un disque tombe, l'autre prend le relais (haute disponibilité). Aucun gain de performance en écriture."},
+  {module:"Virtualisation",diff:"medium",q:"Que permet Kubernetes (K8s) ?",answers:["Créer des VM sur AWS","Orchestrer et gérer automatiquement des conteneurs en cluster","Remplacer Docker","Configurer des réseaux VLAN"],correct:1,expl:"Kubernetes orchestre des conteneurs : déploiement automatique, mise à l'échelle (scaling), auto-healing (redémarrage si crash), load balancing, rolling updates. C'est le standard de l'industrie pour la gestion de conteneurs en production."},
+  {module:"Virtualisation",diff:"hard",q:"Que signifie Infrastructure as Code (IaC) ?",answers:["Coder des applications pour le cloud","Décrire et provisionner l'infrastructure via du code versionnable (Terraform, Ansible)","Remplacer les administrateurs par du code","Un langage de programmation pour le cloud"],correct:1,expl:"L'IaC permet de gérer l'infrastructure comme du code : versionnable, reproductible, automatisable. Terraform = provisioning déclaratif (AWS/Azure/GCP). Ansible = configuration/déploiement. Chef, Puppet = configuration management."},
+  {module:"Virtualisation",diff:"medium",q:"Qu'est-ce qu'un snapshot de VM ?",answers:["Une copie du réseau virtuel","Capture de l'état d'une VM à un instant T (disque + mémoire + config)","Un type de RAID virtuel","Un export de VM en OVA"],correct:1,expl:"Un snapshot capture l'état complet d'une VM : état du disque, de la mémoire et de la configuration. Permet de revenir à un état antérieur (rollback). À ne pas confondre avec un backup — les snapshots ne remplacent pas la sauvegarde."},
+
+  // === PROTOCOLES ===
+  {module:"Protocoles",diff:"easy",q:"Quel protocole attribue automatiquement les adresses IP ?",answers:["DNS","FTP","DHCP","SNMP"],correct:2,expl:"DHCP (Dynamic Host Configuration Protocol, ports 67/68 UDP). Processus DORA : Discover → Offer → Request → Acknowledge. Attribue IP, masque, passerelle, DNS. Bail (lease) avec durée configurable."},
+  {module:"Protocoles",diff:"medium",q:"Rôle du protocole DNS ?",answers:["Chiffrer HTTP","Résoudre noms de domaine → adresses IP","Attribuer des IPs aux hôtes","Synchroniser l'heure"],correct:1,expl:"DNS (port 53 UDP/TCP). Hiérarchie : Root servers (13 clusters) → TLD (.com, .fr) → Authoritative servers → Résolveur local. Record A (IPv4), AAAA (IPv6), MX (email), CNAME (alias), TXT (vérification)."},
+  {module:"Protocoles",diff:"medium",q:"Différence entre TCP et UDP ?",answers:["TCP plus rapide sans accusé de réception","TCP orienté connexion avec contrôle d'erreurs, UDP sans connexion plus rapide sans garantie","UDP plus sécurisé","TCP uniquement en LAN"],correct:1,expl:"TCP : 3-way handshake (SYN/SYN-ACK/ACK), livraison garantie et ordonnée, retransmission. → HTTP, SSH, FTP. UDP : sans connexion, pas d'accusé, plus rapide. → DNS, streaming, VoIP, DHCP, SNMP."},
+  {module:"Protocoles",diff:"hard",q:"Quel protocole supervise les équipements réseau ?",answers:["Syslog","SNMP","NetFlow","RADIUS"],correct:1,expl:"SNMP (ports 161/162 UDP). Manager interroge les agents sur les équipements. MIB (Management Information Base) = base de données des objets supervisables. SNMPv3 ajoute chiffrement et authentification. TRAP = alertes proactives."},
+  {module:"Protocoles",diff:"medium",q:"Protocole d'accès sécurisé à distance pour Linux ?",answers:["Telnet (23)","SSH (22)","RDP (3389)","FTP (21)"],correct:1,expl:"SSH (Secure Shell, port 22/TCP) chiffre tout. Remplace Telnet (clair). Authentification : mot de passe ou clé RSA/Ed25519 (recommandée). SFTP/SCP pour transferts. Tunneling possible pour d'autres protocoles."},
+  {module:"Protocoles",diff:"hard",q:"Qu'est-ce que le NAT/PAT ?",answers:["Un protocole de chiffrement","Traduction d'adresses privées en adresses publiques pour accéder à Internet","Algorithme de routage dynamique","Type de VLAN"],correct:1,expl:"NAT traduit les IPs privées en IPs publiques. PAT (Port Address Translation) = NAT overload : plusieurs hôtes partagent une IP publique via des ports différents. Le routeur maintient une table de traduction. Solution à l'épuisement IPv4."},
+  {module:"Protocoles",diff:"medium",q:"Quel protocole synchronise l'heure sur un réseau ?",answers:["DNS","SNMP","NTP","SMTP"],correct:2,expl:"NTP (Network Time Protocol, port 123 UDP) synchronise les horloges. Précision à la milliseconde. Hiérarchie : Stratum 0 (horloge atomique) → Stratum 1 (serveur primaire) → Stratum 2 → clients. Critique pour Kerberos (AD tolérance 5 min max)."},
+  {module:"Protocoles",diff:"hard",q:"Que fait le protocole LDAP ?",answers:["Chiffre les mots de passe","Protocole d'accès à un annuaire (ex: Active Directory) pour authentification et requêtes","Configure les DNS","Gère les VLANs"],correct:1,expl:"LDAP (Lightweight Directory Access Protocol, port 389 / LDAPS 636) est le protocole standard pour accéder aux annuaires. L'Active Directory expose une interface LDAP. Utilisé pour l'authentification centralisée (SSO, 802.1X)."},
+  {module:"Protocoles",diff:"easy",q:"Quel protocole gère l'envoi d'emails ?",answers:["POP3","IMAP","SMTP","FTP"],correct:2,expl:"SMTP (Simple Mail Transfer Protocol, port 25/587/465) envoie les emails entre serveurs et depuis clients. POP3 (110) et IMAP (143/993) récupèrent les emails. IMAP synchronise (emails restent sur serveur), POP3 télécharge et supprime."},
+  {module:"Protocoles",diff:"medium",q:"Qu'est-ce que HTTPs et comment fonctionne-t-il ?",answers:["HTTP avec compression","HTTP chiffré via TLS/SSL — handshake, échange de certificat, clé de session","HTTP avec authentification basique","HTTP sur IPv6 uniquement"],correct:1,expl:"HTTPS = HTTP over TLS. Handshake TLS : le serveur présente son certificat SSL, le client le vérifie, ils négocient une clé de session symétrique. HSTS force HTTPS pour les visites suivantes. Certificats Let's Encrypt gratuits."},
+
+  // === INFRASTRUCTURE ===
+  {module:"Infrastructure",diff:"easy",q:"Distance maximale d'un câble Ethernet Cat6 en 1 Gbps ?",answers:["55 m","100 m","150 m","500 m"],correct:1,expl:"La norme IEEE 802.3 limite à 100m pour Ethernet cuivré (Cat5e, Cat6, Cat6a). Au-delà : fibre optique. Cat6a supporte le 10 Gbps jusqu'à 100m. La fibre monomode peut aller jusqu'à 100 km."},
+  {module:"Infrastructure",diff:"medium",q:"Différence câble droit vs câble croisé (crossover) ?",answers:["Le droit relie 2 équipements identiques","Le croisé relie 2 équipements identiques (PC-PC), le droit relie équipements différents (PC-switch)","Le croisé est Cat7","Plus de différence avec Auto-MDIX"],correct:1,expl:"Câble droit : brochage identique aux 2 bouts (T568A-T568A ou T568B-T568B) → PC↔Switch, Switch↔Routeur. Croisé : brochage inversé → PC↔PC, Switch↔Switch. Auto-MDIX (équipements modernes) détecte automatiquement."},
+  {module:"Infrastructure",diff:"easy",q:"Qu'est-ce qu'un VLAN ?",answers:["Réseau uniquement fibre","Segmentation logique d'un réseau physique en réseaux virtuels isolés","Protocole de routage inter-datacenter","Connexion WAN chiffrée"],correct:1,expl:"Un VLAN segmente logiquement un switch en plusieurs réseaux virtuels isolés (ID 1-4094). Ports Access = un VLAN, ports Trunk = transportent plusieurs VLANs via le tag 802.1Q. Avantages : sécurité, performance (broadcast réduit), flexibilité."},
+  {module:"Infrastructure",diff:"medium",q:"Qu'est-ce qu'un UPS (onduleur) dans une salle serveur ?",answers:["Un système de refroidissement","Un système d'alimentation sans interruption qui maintient l'alimentation lors d'une coupure","Un système de câblage redondant","Un pare-feu matériel"],correct:1,expl:"Un UPS (Uninterruptible Power Supply) protège contre les coupures de courant via des batteries. Permet l'arrêt propre des serveurs ou la bascule sur un groupe électrogène. Dimensionnement en VA ou kVA selon la charge à soutenir."},
+  {module:"Infrastructure",diff:"hard",q:"Que signifie le marquage 802.1Q sur un lien trunk ?",answers:["Chiffrement des trames","Ajout d'un tag de 4 octets dans la trame Ethernet pour identifier le VLAN","Protocole de spanning tree","Standard de câblage Cat6a"],correct:1,expl:"802.1Q ajoute un tag de 4 octets (TPID + TCI) dans l'en-tête Ethernet, contenant l'ID VLAN (12 bits = 4094 VLANs possibles) et la priorité QoS (3 bits). Le VLAN natif n'est pas tagué sur un trunk Cisco."},
+  {module:"Infrastructure",diff:"medium",q:"Quelle est la différence entre fibre monomode et multimode ?",answers:["La multimode est plus longue portée","La monomode a un cœur plus petit (9µm), porte plus loin (km) ; la multimode (50-62.5µm) est moins chère, pour les courtes distances","La monomode est moins chère","Il n'y a pas de différence optique"],correct:1,expl:"Monomode (SMF) : cœur 9µm, laser, portée jusqu'à 100km, cher. → Liaisons longue distance, FAI. Multimode (MMF) : cœur 50/62.5µm, LED ou laser VCSEL, portée 300m-2km, moins cher. → Datacenter, campus."},
+  {module:"Infrastructure",diff:"easy",q:"Que signifie PoE (Power over Ethernet) ?",answers:["Un protocole de routage","Alimentation électrique d'équipements via le câble Ethernet réseau","Un type de fibre optique","Un standard de câblage sans fil"],correct:1,expl:"PoE (IEEE 802.3af/at/bt) alimente des équipements (téléphones IP, points d'accès WiFi, caméras IP) via le câble Ethernet. Évite un câble d'alimentation séparé. PoE : 15.4W, PoE+ : 30W, PoE++ : 60-100W."},
+];
+
+// ============================================================
+// MODULES CONFIG
+// ============================================================
+const MODULES = [
+  {id:"Réseaux",       icon:"🌐", topics:"IP, masques, VLAN, routage, STP"},
+  {id:"Systèmes",      icon:"🖥️", topics:"Linux, Windows Server, AD, GPO"},
+  {id:"Sécurité",      icon:"🔐", topics:"Menaces, VPN, IDS/IPS, 2FA"},
+  {id:"Virtualisation",icon:"☁️", topics:"VM, Docker, Kubernetes, RAID, IaaS"},
+  {id:"Protocoles",    icon:"📡", topics:"DHCP, DNS, TCP/UDP, SSH, SNMP"},
+  {id:"Infrastructure",icon:"🔧", topics:"Câblage, VLAN, fibre, PoE, UPS"},
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let selected = new Set(MODULES.map(m=>m.id));
+let examQ = [], cur = 0, ans = [], answered = false;
+let timerInt = null, timeLeft = 45, tpq = 45;
+let liveCorrect = 0, liveWrong = 0;
+let allSelected = true;
+
+// ============================================================
+// INIT
+// ============================================================
+function initModuleGrid() {
+  const grid = document.getElementById('modules-grid');
+  MODULES.forEach(mod => {
+    const count = QUESTIONS.filter(q=>q.module===mod.id).length;
+    const card = document.createElement('div');
+    card.className = 'mod-card selected';
+    card.id = 'mc-'+mod.id;
+    card.onclick = () => toggleMod(mod.id, card);
+    card.innerHTML = `
+      <div class="mod-card-top">
+        <span class="mod-icon">${mod.icon}</span>
+        <span class="mod-q-count">${count} Q</span>
+      </div>
+      <div class="mod-name">${mod.id}</div>
+      <div class="mod-topics">${mod.topics}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function toggleMod(id, card) {
+  if (selected.has(id)) { selected.delete(id); card.classList.remove('selected'); }
+  else { selected.add(id); card.classList.add('selected'); }
+}
+
+function toggleAll() {
+  if (allSelected) {
+    selected.clear();
+    MODULES.forEach(m => document.getElementById('mc-'+m.id).classList.remove('selected'));
+    document.getElementById('all-btn').textContent = '☐ Tout sélectionner';
+    allSelected = false;
+  } else {
+    MODULES.forEach(m => { selected.add(m.id); document.getElementById('mc-'+m.id).classList.add('selected'); });
+    document.getElementById('all-btn').textContent = '☑ Tout désélectionner';
+    allSelected = true;
+  }
+}
+
+// ============================================================
+// START
+// ============================================================
+function startExam() {
+  if (!selected.size) { alert('Sélectionne au moins un module !'); return; }
+  const count = parseInt(document.getElementById('q-count').value);
+  tpq = parseInt(document.getElementById('tpq').value);
+  const diff = document.getElementById('diff').value;
+
+  let pool = QUESTIONS.filter(q => selected.has(q.module));
+  if (diff !== 'all') pool = pool.filter(q => q.diff === diff);
+  if (!pool.length) { alert('Aucune question pour cette sélection !'); return; }
+
+  examQ = shuffle(pool).slice(0, Math.min(count, pool.length));
+  ans = new Array(examQ.length).fill(null);
+  cur = 0; liveCorrect = 0; liveWrong = 0;
+
+  document.getElementById('menu-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'block';
+  document.getElementById('result-screen').style.display = 'none';
+  renderQ();
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function renderQ() {
+  answered = false;
+  clearInterval(timerInt);
+  const q = examQ[cur], total = examQ.length;
+  document.getElementById('q-prog').textContent = `Q${cur+1} / ${total}`;
+  document.getElementById('prog-fill').style.width = `${(cur/total)*100}%`;
+  document.getElementById('q-num').textContent = `Q${cur+1}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('live-c').textContent = liveCorrect;
+  document.getElementById('live-w').textContent = liveWrong;
+
+  const mod = MODULES.find(m=>m.id===q.module);
+  document.getElementById('module-live').textContent = mod ? mod.icon+' '+q.module : '';
+
+  const codeEl = document.getElementById('q-code');
+  if (q.code) { codeEl.textContent = q.code; codeEl.style.display='block'; }
+  else codeEl.style.display = 'none';
+
+  const diffCls = {easy:'tag-green',medium:'tag-orange',hard:'tag-red'}[q.diff];
+  const diffLbl = {easy:'Facile',medium:'Moyen',hard:'Difficile'}[q.diff];
+  document.getElementById('q-meta').innerHTML = `
+    <span class="tag tag-purple">${mod?mod.icon+' ':''} ${q.module}</span>
+    <span class="tag ${diffCls}">${diffLbl}</span>
+  `;
+
+  const grid = document.getElementById('answers');
+  grid.innerHTML = '';
+  const L = ['A','B','C','D'];
+  q.answers.forEach((a,i) => {
+    const btn = document.createElement('button');
+    btn.className = 'ans-btn';
+    btn.onclick = () => pickAns(i);
+    btn.innerHTML = `<span class="ans-letter">${L[i]}</span><span>${a}</span>`;
+    grid.appendChild(btn);
+  });
+
+  document.getElementById('expl').className = 'expl-box';
+  document.getElementById('next-btn').style.display = 'none';
+  startTimer();
+}
+
+function startTimer() {
+  timeLeft = tpq;
+  updateTimer();
+  timerInt = setInterval(() => {
+    timeLeft--;
+    updateTimer();
+    if (timeLeft <= 0) { clearInterval(timerInt); if (!answered) timeout(); }
+  }, 1000);
+}
+
+function updateTimer() {
+  const el = document.getElementById('timer');
+  el.textContent = timeLeft;
+  el.className = 'timer';
+  if (timeLeft <= 10) el.classList.add('danger');
+  else if (timeLeft <= 20) el.classList.add('warn');
+}
+
+function timeout() {
+  answered = true; ans[cur] = -1; reveal(-1);
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function pickAns(idx) {
+  if (answered) return;
+  answered = true; clearInterval(timerInt);
+  ans[cur] = idx;
+  if (idx === examQ[cur].correct) liveCorrect++;
+  else liveWrong++;
+  reveal(idx);
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function reveal(sel) {
+  const q = examQ[cur];
+  document.querySelectorAll('.ans-btn').forEach((btn,i) => {
+    btn.disabled = true;
+    if (i === q.correct) btn.classList.add('correct');
+    else if (i === sel && sel !== q.correct) btn.classList.add('wrong');
+  });
+  const expl = document.getElementById('expl');
+  expl.textContent = '💡 ' + q.expl;
+  expl.classList.add('show');
+}
+
+function nextQ() { cur++; cur >= examQ.length ? showResults() : renderQ(); }
+function skipQ() {
+  if (!answered) { ans[cur] = -1; }
+  cur++;
+  clearInterval(timerInt);
+  cur >= examQ.length ? showResults() : renderQ();
+}
+
+// ============================================================
+// RESULTS
+// ============================================================
+function showResults() {
+  clearInterval(timerInt);
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'block';
+
+  let correct=0, wrong=0, skipped=0;
+  const modCorrect={}, modTotal={};
+
+  examQ.forEach((q,i) => {
+    modTotal[q.module] = (modTotal[q.module]||0)+1;
+    const a = ans[i];
+    if (a === q.correct) { correct++; modCorrect[q.module]=(modCorrect[q.module]||0)+1; }
+    else if (a===-1||a===null) skipped++;
+    else wrong++;
+  });
+
+  const pct = Math.round((correct/examQ.length)*100);
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.getElementById('r-correct').textContent = correct;
+  document.getElementById('r-wrong').textContent = wrong;
+  document.getElementById('r-skip').textContent = skipped;
+
+  const verdicts = [
+    [85,'🏆 Excellent !','Maîtrise solide — tu es prêt pour l\'examen TSSR'],
+    [70,'✅ Bon niveau','Quelques points à consolider'],
+    [50,'⚠️ Niveau moyen','Revois les modules faibles ci-dessous'],
+    [0,'❌ À retravailler','Reprends les fondamentaux et relance l\'examen'],
+  ];
+  const [,v,s] = verdicts.find(([t])=>pct>=t);
+  document.getElementById('r-verdict').textContent = v;
+  document.getElementById('r-sub').textContent = s;
+
+  // Module scores
+  const modScores = {};
+  const modGrid = document.getElementById('mod-results');
+  modGrid.innerHTML = '';
+  MODULES.forEach(mod => {
+    if (!modTotal[mod.id]) return;
+    const c = modCorrect[mod.id]||0, t = modTotal[mod.id];
+    const mp = Math.round((c/t)*100);
+    modScores[mod.id] = mp;
+    const color = mp>=70?'var(--green)':mp>=50?'var(--orange)':'var(--red)';
+    modGrid.innerHTML += `
+      <div class="mod-result-card">
+        <div class="mod-res-name">${mod.icon} ${mod.id}</div>
+        <div class="mod-res-bar"><div class="mod-res-fill" style="width:${mp}%;background:${color}"></div></div>
+        <div class="mod-res-pct">${c}/${t} — ${mp}%</div>
+      </div>
+    `;
+  });
+
+  // Review
+  const rev = document.getElementById('review');
+  rev.innerHTML = '';
+  const L=['A','B','C','D'];
+  examQ.forEach((q,i) => {
+    const a=ans[i], ok=a===q.correct, skip=a===-1||a===null;
+    const icon=ok?'✅':skip?'⏭️':'❌';
+    rev.innerHTML += `
+      <div class="review-item">
+        <div class="ri-icon">${icon}</div>
+        <div>
+          <div class="ri-q">${i+1}. ${q.q}</div>
+          <div class="ri-ans">
+            ${!ok&&!skip?`<span class="ko">Donné: ${L[a]}. ${q.answers[a]}</span><br>`:''}
+            Correct: <span class="ok">${L[q.correct]}. ${q.answers[q.correct]}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  // Save to localStorage
+  Storage.saveExam({score:pct, correct, wrong, skipped, total:examQ.length, modules:modScores});
+}
+
+function showMenu() {
+  clearInterval(timerInt);
+  document.getElementById('menu-screen').style.display='block';
+  document.getElementById('exam-screen').style.display='none';
+  document.getElementById('result-screen').style.display='none';
+}
+
+function shuffle(a) {
+  const b=[...a];
+  for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}
+  return b;
+}
+
+initModuleGrid();
+</script>
+</body>
+</html>
