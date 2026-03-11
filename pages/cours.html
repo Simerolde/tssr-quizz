@@ -97,6 +97,13 @@
     <button class="tab-btn" onclick="showTab('virtualisation')">☁️ Virtualisation</button>
     <button class="tab-btn" onclick="showTab('protocoles')">📡 Protocoles</button>
     <button class="tab-btn" onclick="showTab('infra')">🔧 Infrastructure</button>
+    <button class="tab-btn" onclick="showTab('powershell')">💙 PowerShell</button>
+    <button class="tab-btn" onclick="showTab('bash')">🐚 Bash</button>
+    <button class="tab-btn" onclick="showTab('linux-avance')">🐧 Linux Avancé</button>
+    <button class="tab-btn" onclick="showTab('apache')">🌍 Apache2 / IIS</button>
+    <button class="tab-btn" onclick="showTab('backup')">💾 Sauvegarde</button>
+    <button class="tab-btn" onclick="showTab('glpi')">🖨️ GLPI & ITIL</button>
+    <button class="tab-btn" onclick="showTab('cisco-avance')">🔩 Cisco Avancé</button>
   </div>
 
   <!-- ===== RÉSEAUX ===== -->
@@ -483,6 +490,909 @@ docker compose down</div>
       </ul></div>
     </div>
   </div>
+    
+    <!-- ===== POWERSHELL ===== -->
+    
+<div class="fiche" id="fiche-powershell">
+  <div class="fiche-header">
+    <span class="fiche-icon">💙</span>
+    <div><div class="fiche-title">PowerShell</div><div class="fiche-sub">Cmdlets · Pipeline · Scripts · Active Directory</div></div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Structure d'une cmdlet PowerShell</div>
+    <div class="cs-content">PowerShell utilise la convention <strong>Verbe-Nom</strong> : Get-Service, Set-Item, New-User, Remove-Item. Le pipeline <code style="font-family:var(--mono);color:#93c5fd">|</code> transmet les objets (pas du texte) entre les cmdlets.</div>
+    <div class="code-block"># Lister les services en cours d'exécution
+Get-Service | Where-Object {$_.Status -eq 'Running'} | Select-Object Name, DisplayName
+
+# Arrêter un service
+Stop-Service -Name 'Spooler' -Force
+
+# Lister les processus consommant plus de 100MB RAM
+Get-Process | Where-Object {$_.WorkingSet -gt 100MB} | Sort-Object WorkingSet -Descending
+
+# Voir les events d'erreur dans les logs Windows
+Get-EventLog -LogName System -EntryType Error -Newest 20</div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Gestion des fichiers et dossiers</div>
+    <div class="code-block"># Lister le contenu d'un dossier récursivement
+Get-ChildItem C:\Users -Recurse -Filter '*.log'
+
+# Copier un fichier
+Copy-Item C:\source\fichier.txt D:\destination\
+
+# Déplacer
+Move-Item C:\source\fichier.txt D:\destination\
+
+# Supprimer (avec confirmation)
+Remove-Item C:\temp\* -Recurse -Confirm
+
+# Créer un dossier
+New-Item -Path C:\MonDossier -ItemType Directory
+
+# Lire un fichier (10 dernières lignes)
+Get-Content C:\logs\app.log -Tail 10 -Wait</div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Gestion des utilisateurs locaux</div>
+    <div class="code-block"># Créer un utilisateur local
+$password = ConvertTo-SecureString "MotDePasse1!" -AsPlainText -Force
+New-LocalUser -Name "alice" -Password $password -FullName "Alice Dupont" -Description "Comptabilité"
+
+# Ajouter au groupe Administrateurs
+Add-LocalGroupMember -Group "Administrateurs" -Member "alice"
+
+# Lister les utilisateurs locaux
+Get-LocalUser
+
+# Désactiver un compte
+Disable-LocalUser -Name "alice"
+
+# Modifier le mot de passe
+Set-LocalUser -Name "alice" -Password (ConvertTo-SecureString "NvxMdp!" -AsPlainText -Force)</div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Gestion Active Directory (RSAT)</div>
+    <div class="code-block"># Importer le module AD (nécessite RSAT)
+Import-Module ActiveDirectory
+
+# Créer un utilisateur AD
+New-ADUser -Name "Bob Martin" -SamAccountName "bmartin" `
+  -UserPrincipalName "bmartin@domain.local" `
+  -Path "OU=Utilisateurs,DC=domain,DC=local" `
+  -AccountPassword (ConvertTo-SecureString "Pass1!" -AsPlainText -Force) `
+  -Enabled $true
+
+# Trouver les comptes inactifs depuis 90 jours
+Search-ADAccount -AccountInactive -TimeSpan 90.00:00:00 | Select-Object Name, LastLogonDate
+
+# Lister les membres d'un groupe
+Get-ADGroupMember -Identity "Domain Admins" | Select-Object Name, SamAccountName
+
+# Déplacer un objet AD dans une OU
+Move-ADObject -Identity "CN=Bob Martin,OU=Old,DC=domain,DC=local" `
+  -TargetPath "OU=Comptabilite,DC=domain,DC=local"</div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Réseau & Diagnostic</div>
+    <div class="code-block"># Test de connectivité (ping amélioré)
+Test-Connection google.com -Count 4
+
+# Test de port TCP
+Test-NetConnection 192.168.1.1 -Port 443
+
+# Voir les interfaces réseau
+Get-NetAdapter | Where-Object {$_.Status -eq 'Up'}
+
+# Voir la table de routage
+Get-NetRoute
+
+# Configurer une IP statique
+New-NetIPAddress -InterfaceAlias "Ethernet" -IPAddress 192.168.1.50 `
+  -PrefixLength 24 -DefaultGateway 192.168.1.1
+
+# Configurer le DNS
+Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses 192.168.1.1,8.8.8.8</div>
+  </div>
+
+  <div class="retenir-box">
+    <div class="retenir-title">⭐ Cmdlets indispensables à retenir</div>
+    <div class="cs-content"><ul>
+      <li><strong>Get-Help cmdlet -Examples</strong> : affiche l'aide avec exemples (RTFM PowerShell)</li>
+      <li><strong>Get-Member</strong> (alias gm) : affiche les propriétés et méthodes d'un objet du pipeline</li>
+      <li><strong>Select-Object</strong> : choisir les propriétés à afficher</li>
+      <li><strong>Sort-Object</strong> : trier · <strong>Group-Object</strong> : grouper · <strong>Measure-Object</strong> : compter/somme/moyenne</li>
+      <li><strong>Export-Csv</strong> : exporter en CSV · <strong>ConvertTo-Html</strong> : exporter en HTML</li>
+      <li>Politique d'exécution : <code style="font-family:var(--mono);color:#93c5fd">Set-ExecutionPolicy RemoteSigned</code> pour autoriser les scripts</li>
+    </ul></div>
+  </div>
+</div>
+
+
+<!-- ===== BASH / SCRIPTING ===== -->
+<div class="fiche" id="fiche-bash">
+  <div class="fiche-header">
+    <span class="fiche-icon">🐚</span>
+    <div><div class="fiche-title">Bash & Scripting</div><div class="fiche-sub">Scripts · Variables · Boucles · Cron · Automatisation</div></div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Structure d'un script Bash</div>
+    <div class="code-block">#!/bin/bash
+# Description : Script de sauvegarde quotidienne
+# Auteur : Admin IT
+# Date : 2024-01-01
+
+# === VARIABLES ===
+SOURCE="/var/www/html"
+DEST="/backup/web"
+DATE=$(date +%Y%m%d_%H%M%S)
+LOG="/var/log/backup.log"
+
+# === FONCTIONS ===
+log_message() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG"
+}
+
+# === CODE PRINCIPAL ===
+log_message "Démarrage de la sauvegarde"
+
+if [ -d "$SOURCE" ]; then
+    tar -czf "${DEST}/web_${DATE}.tar.gz" "$SOURCE"
+    if [ $? -eq 0 ]; then
+        log_message "Sauvegarde réussie : web_${DATE}.tar.gz"
+    else
+        log_message "ERREUR : échec de la sauvegarde"
+        exit 1
+    fi
+else
+    log_message "ERREUR : $SOURCE n'existe pas"
+    exit 1
+fi</div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Variables et types</div>
+    <div class="code-block"># Déclaration (pas d'espace autour du =)
+NOM="Alice"
+AGE=28
+LISTE=("item1" "item2" "item3")
+
+# Utilisation (toujours entre guillemets doubles)
+echo "Bonjour $NOM, tu as $AGE ans"
+echo "Premier élément : ${LISTE[0]}"
+
+# Variables spéciales
+echo "Nom du script : $0"
+echo "1er argument : $1"
+echo "Tous les args : $@"
+echo "Nombre d'args : $#"
+echo "PID du script : $$"
+echo "Code retour dernier cmd : $?"
+
+# Substitution de commande
+DATE_ACTUELLE=$(date +%Y-%m-%d)
+NB_FICHIERS=$(ls /var/log/ | wc -l)
+echo "Il y a $NB_FICHIERS fichiers dans /var/log/"</div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Conditions et boucles</div>
+    <div class="code-block"># IF - conditions sur fichiers
+if [ -f "/etc/passwd" ]; then echo "Fichier existe"; fi
+if [ -d "/var/log" ]; then echo "Dossier existe"; fi
+if [ -r "$FICHIER" ]; then echo "Lisible"; fi
+
+# IF - comparaisons numériques
+if [ $AGE -gt 18 ]; then echo "Majeur"; fi
+# -eq (=), -ne (!=), -lt (<), -le (<=), -gt (>), -ge (>=)
+
+# IF - chaînes de caractères
+if [ "$NOM" = "Alice" ]; then echo "C'est Alice"; fi
+if [ -z "$VAR" ]; then echo "Variable vide"; fi
+if [ -n "$VAR" ]; then echo "Variable non vide"; fi
+
+# FOR - parcourir des fichiers
+for fichier in /var/log/*.log; do
+    echo "Traitement : $fichier"
+done
+
+# WHILE - boucle avec compteur
+i=1
+while [ $i -le 5 ]; do
+    echo "Tour $i"
+    ((i++))
+done
+
+# CASE - équivalent switch
+case "$1" in
+    start)   echo "Démarrage..." ;;
+    stop)    echo "Arrêt..."    ;;
+    status)  echo "Statut..."   ;;
+    *)       echo "Usage: $0 {start|stop|status}" ;;
+esac</div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Cron — Planification de tâches</div>
+    <div class="code-block"># Éditer le crontab de l'utilisateur courant
+crontab -e
+
+# Syntaxe : MIN HEURE JOUR MOIS JOUR_SEMAINE COMMANDE
+# MIN     : 0-59
+# HEURE   : 0-23
+# JOUR    : 1-31
+# MOIS    : 1-12
+# JOUR_S  : 0-7 (0 et 7 = dimanche)
+
+# Exemples :
+0 2 * * *     /opt/scripts/backup.sh          # Tous les jours à 2h
+0 */4 * * *   /opt/scripts/check.sh           # Toutes les 4 heures
+30 23 * * 5   /opt/scripts/weekly_report.sh   # Vendredi à 23h30
+0 0 1 * *     /opt/scripts/monthly.sh         # 1er du mois à minuit
+*/5 * * * *   /opt/scripts/monitor.sh         # Toutes les 5 minutes
+
+# Cron spéciaux :
+@reboot       /opt/scripts/startup.sh         # Au démarrage
+@daily        /opt/scripts/daily.sh           # Quotidien (= 0 0 * * *)
+@weekly       /opt/scripts/weekly.sh          # Hebdo (= 0 0 * * 0)
+
+# Voir les crontabs de tous les users (root)
+for user in $(cut -d: -f1 /etc/passwd); do echo "=== $user ==="; crontab -u $user -l 2>/dev/null; done</div>
+  </div>
+
+  <div class="retenir-box">
+    <div class="retenir-title">⭐ Commandes shell incontournables</div>
+    <div class="cs-content"><ul>
+      <li><code style="font-family:var(--mono);color:#93c5fd">grep -r "erreur" /var/log/</code> : chercher dans les logs</li>
+      <li><code style="font-family:var(--mono);color:#93c5fd">find /home -name "*.tmp" -mtime +30 -delete</code> : nettoyer les vieux fichiers</li>
+      <li><code style="font-family:var(--mono);color:#93c5fd">awk '{print $1}' fichier</code> : extraire la 1ère colonne</li>
+      <li><code style="font-family:var(--mono);color:#93c5fd">sed -i 's/ancien/nouveau/g' fichier</code> : remplacer dans un fichier</li>
+      <li><code style="font-family:var(--mono);color:#93c5fd">2>/dev/null</code> : ignorer les erreurs · <code style="font-family:var(--mono);color:#93c5fd">&amp;></code> : tout rediriger</li>
+      <li>Tester un script sans l'exécuter : <code style="font-family:var(--mono);color:#93c5fd">bash -n script.sh</code></li>
+    </ul></div>
+  </div>
+</div>
+
+
+<!-- ===== LINUX AVANCÉ ===== -->
+<div class="fiche" id="fiche-linux-avance">
+  <div class="fiche-header">
+    <span class="fiche-icon">🐧</span>
+    <div><div class="fiche-title">Linux Avancé</div><div class="fiche-sub">ACL · Vim/Nano · Liens symboliques · DNS · Fichiers système</div></div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Éditeurs de texte — Vim & Nano</div>
+    <table class="table-cours">
+      <tr><th>Action</th><th>Vim</th><th>Nano</th></tr>
+      <tr><td>Ouvrir un fichier</td><td class="mono">vim fichier.txt</td><td class="mono">nano fichier.txt</td></tr>
+      <tr><td>Mode insertion</td><td class="mono">i (avant) / a (après)</td><td>Directement actif</td></tr>
+      <tr><td>Retour mode normal</td><td class="mono">Échap</td><td>—</td></tr>
+      <tr><td>Sauvegarder</td><td class="mono">:w</td><td class="mono">Ctrl+O puis Entrée</td></tr>
+      <tr><td>Quitter</td><td class="mono">:q</td><td class="mono">Ctrl+X</td></tr>
+      <tr><td>Sauvegarder + quitter</td><td class="mono">:wq ou ZZ</td><td class="mono">Ctrl+X → Y</td></tr>
+      <tr><td>Quitter sans sauver</td><td class="mono">:q!</td><td class="mono">Ctrl+X → N</td></tr>
+      <tr><td>Chercher</td><td class="mono">/mot puis n/N</td><td class="mono">Ctrl+W</td></tr>
+      <tr><td>Chercher/Remplacer</td><td class="mono">:%s/ancien/nouveau/g</td><td class="mono">Ctrl+\</td></tr>
+      <tr><td>Numéros de lignes</td><td class="mono">:set number</td><td class="mono">Alt+N</td></tr>
+      <tr><td>Aller à la ligne N</td><td class="mono">:N (ex: :42)</td><td class="mono">Ctrl+_</td></tr>
+      <tr><td>Couper une ligne</td><td class="mono">dd</td><td class="mono">Ctrl+K</td></tr>
+      <tr><td>Coller</td><td class="mono">p</td><td class="mono">Ctrl+U</td></tr>
+    </table>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">ACL — Droits fins (setfacl / getfacl)</div>
+    <div class="code-block"># Vérifier les ACL d'un fichier
+getfacl /var/partage/rapport.pdf
+
+# Donner des droits en lecture/écriture à un utilisateur
+setfacl -m u:alice:rw /var/partage/rapport.pdf
+
+# Donner des droits à un groupe
+setfacl -m g:comptabilite:rx /var/partage/
+
+# ACL par défaut (héritées par les nouveaux fichiers dans un dossier)
+setfacl -d -m g:developpeurs:rwx /var/projets/
+
+# Supprimer les ACL d'un utilisateur
+setfacl -x u:alice /var/partage/rapport.pdf
+
+# Supprimer TOUTES les ACL
+setfacl -b /var/partage/rapport.pdf
+
+# Copier les ACL d'un fichier à un autre
+getfacl source.txt | setfacl --set-file=- dest.txt
+
+# IMPORTANT : la partition doit être montée avec l'option 'acl'
+# Dans /etc/fstab : /dev/sdb1 /var/partage ext4 defaults,acl 0 2</div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Liens symboliques et durs</div>
+    <div class="code-block"># Créer un lien symbolique (soft link = raccourci)
+ln -s /etc/apache2/sites-available/monsite.conf /etc/apache2/sites-enabled/
+
+# Créer un lien dur (hard link = même inode)
+ln /var/log/app.log /backup/app_link.log
+
+# Vérifier si c'est un lien symbolique
+ls -la /etc/apache2/sites-enabled/
+# → monsite.conf -> ../sites-available/monsite.conf
+
+# Trouver tous les liens symboliques cassés
+find / -xtype l 2>/dev/null
+
+# Supprimer un lien symbolique (NE PAS mettre de / à la fin)
+rm /etc/apache2/sites-enabled/monsite.conf
+# ou
+unlink /etc/apache2/sites-enabled/monsite.conf
+
+# Différence :
+# Lien symbolique : peut traverser les partitions, pointe vers un chemin
+# Lien dur : même inode, même partition uniquement, persiste si l'original est supprimé</div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Fichiers de configuration système Linux essentiels</div>
+    <table class="table-cours">
+      <tr><th>Fichier</th><th>Rôle</th></tr>
+      <tr><td class="mono">/etc/passwd</td><td>Comptes utilisateurs (login:x:UID:GID:info:home:shell)</td></tr>
+      <tr><td class="mono">/etc/shadow</td><td>Mots de passe hashés (root uniquement)</td></tr>
+      <tr><td class="mono">/etc/group</td><td>Groupes et leurs membres</td></tr>
+      <tr><td class="mono">/etc/fstab</td><td>Points de montage automatiques au boot</td></tr>
+      <tr><td class="mono">/etc/hosts</td><td>Résolution DNS statique locale (bypass DNS)</td></tr>
+      <tr><td class="mono">/etc/resolv.conf</td><td>Serveurs DNS utilisés par le système</td></tr>
+      <tr><td class="mono">/etc/hostname</td><td>Nom de la machine</td></tr>
+      <tr><td class="mono">/etc/network/interfaces</td><td>Config réseau Debian (ou /etc/netplan/*.yaml sur Ubuntu)</td></tr>
+      <tr><td class="mono">/etc/ssh/sshd_config</td><td>Config du serveur SSH (port, auth, root login...)</td></tr>
+      <tr><td class="mono">/etc/sudoers</td><td>Droits sudo (éditer via visudo !)</td></tr>
+      <tr><td class="mono">/etc/crontab</td><td>Tâches planifiées système</td></tr>
+      <tr><td class="mono">/var/log/syslog</td><td>Logs système généraux (Debian)</td></tr>
+      <tr><td class="mono">/var/log/auth.log</td><td>Logs d'authentification (SSH, sudo, su)</td></tr>
+      <tr><td class="mono">/proc/</td><td>Système de fichiers virtuel : info processus et kernel</td></tr>
+    </table>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Configuration DNS avec BIND9 (Linux)</div>
+    <div class="code-block"># Installation
+apt install bind9 bind9utils -y
+
+# Fichier de déclaration des zones : /etc/bind/named.conf.local
+zone "mondomaine.local" {
+    type master;
+    file "/etc/bind/db.mondomaine.local";
+};
+
+# Fichier de zone : /etc/bind/db.mondomaine.local
+$TTL 86400
+@   IN  SOA ns1.mondomaine.local. admin.mondomaine.local. (
+            2024010101  ; Serial (incrémenté à chaque modif !)
+            3600        ; Refresh
+            900         ; Retry
+            604800      ; Expire
+            86400 )     ; Negative TTL
+
+; Serveurs de noms
+@       IN  NS  ns1.mondomaine.local.
+
+; Enregistrements A (nom → IP)
+ns1     IN  A   192.168.1.1
+srv1    IN  A   192.168.1.10
+www     IN  A   192.168.1.20
+
+; Alias CNAME
+ftp     IN  CNAME  srv1.mondomaine.local.
+
+# Vérifier la syntaxe
+named-checkzone mondomaine.local /etc/bind/db.mondomaine.local
+
+# Redémarrer BIND
+systemctl restart bind9</div>
+  </div>
+
+  <div class="retenir-box">
+    <div class="retenir-title">⭐ À retenir absolument</div>
+    <div class="cs-content"><ul>
+      <li>ACL nécessite que la partition soit montée avec l'option <code style="font-family:var(--mono);color:#93c5fd">acl</code> dans /etc/fstab</li>
+      <li>Vim : toujours vérifier dans quel mode on est — Échap pour revenir en mode normal</li>
+      <li>Liens symboliques : a2ensite d'Apache crée des liens symboliques dans sites-enabled/</li>
+      <li>BIND9 : incrémenter le Serial à chaque modification de zone (format recommandé : YYYYMMDDNN)</li>
+      <li>/etc/hosts est consulté AVANT le DNS (sauf si nsswitch.conf modifié)</li>
+      <li>visudo (et non vi /etc/sudoers) valide la syntaxe avant de sauvegarder</li>
+    </ul></div>
+  </div>
+</div>
+
+
+<!-- ===== APACHE2 / IIS ===== -->
+<div class="fiche" id="fiche-apache">
+  <div class="fiche-header">
+    <span class="fiche-icon">🌍</span>
+    <div><div class="fiche-title">Apache2 & IIS</div><div class="fiche-sub">Installation · VirtualHosts · HTTPS · Logs · Windows IIS</div></div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Apache2 — Installation et structure (Debian/Ubuntu)</div>
+    <div class="code-block"># Installation
+apt install apache2 -y
+systemctl enable --now apache2
+
+# Structure des répertoires
+/etc/apache2/
+├── apache2.conf          # Config principale
+├── ports.conf            # Ports d'écoute (80, 443)
+├── sites-available/      # Tous les VirtualHosts configurés
+│   ├── 000-default.conf  # Site par défaut HTTP
+│   └── default-ssl.conf  # Site par défaut HTTPS
+├── sites-enabled/        # Liens symboliques vers les sites actifs
+├── mods-available/       # Modules disponibles
+├── mods-enabled/         # Modules actifs (liens symboliques)
+└── conf-available/       # Configs supplémentaires
+
+# Commandes de gestion
+a2ensite monsite.conf     # Activer un site
+a2dissite monsite.conf    # Désactiver un site
+a2enmod ssl               # Activer le module SSL
+a2enmod rewrite           # Activer mod_rewrite
+apache2ctl configtest     # Tester la syntaxe avant reload
+systemctl reload apache2  # Recharger sans interruption</div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Créer un VirtualHost HTTP</div>
+    <div class="code-block"># Fichier : /etc/apache2/sites-available/monsite.conf
+
+<VirtualHost *:80>
+    ServerName monsite.local
+    ServerAlias www.monsite.local
+    DocumentRoot /var/www/monsite
+
+    # Logs spécifiques au site
+    ErrorLog ${APACHE_LOG_DIR}/monsite_error.log
+    CustomLog ${APACHE_LOG_DIR}/monsite_access.log combined
+
+    # Options du répertoire
+    <Directory /var/www/monsite>
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+
+# Activation
+a2ensite monsite.conf
+systemctl reload apache2
+
+# Créer le répertoire et une page test
+mkdir -p /var/www/monsite
+echo "<h1>Monsite fonctionne !</h1>" > /var/www/monsite/index.html
+chown -R www-data:www-data /var/www/monsite</div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">VirtualHost HTTPS avec certificat auto-signé</div>
+    <div class="code-block"># Générer un certificat auto-signé (test uniquement)
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /etc/ssl/private/monsite.key \
+  -out /etc/ssl/certs/monsite.crt \
+  -subj "/C=FR/ST=Loire/L=Nantes/O=MonEntreprise/CN=monsite.local"
+
+# Activer le module SSL
+a2enmod ssl
+
+# VirtualHost HTTPS
+<VirtualHost *:443>
+    ServerName monsite.local
+    DocumentRoot /var/www/monsite
+
+    SSLEngine on
+    SSLCertificateFile    /etc/ssl/certs/monsite.crt
+    SSLCertificateKeyFile /etc/ssl/private/monsite.key
+
+    ErrorLog ${APACHE_LOG_DIR}/monsite_ssl_error.log
+    CustomLog ${APACHE_LOG_DIR}/monsite_ssl_access.log combined
+</VirtualHost>
+
+# Redirection HTTP → HTTPS (dans le VirtualHost *:80)
+<VirtualHost *:80>
+    ServerName monsite.local
+    Redirect permanent / https://monsite.local/
+</VirtualHost></div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">IIS — Internet Information Services (Windows Server)</div>
+    <div class="code-block"># Installer IIS via PowerShell
+Install-WindowsFeature -Name Web-Server -IncludeManagementTools
+
+# Structure IIS équivalente à Apache :
+# Site Apache VirtualHost  = Site IIS
+# DocumentRoot             = Répertoire physique du site
+# Port/hostname binding    = Liaison (binding) IIS
+# .htaccess                = web.config
+
+# Ouvrir le Gestionnaire IIS
+inetmgr
+
+# Via PowerShell (module WebAdministration)
+Import-Module WebAdministration
+
+# Créer un nouveau site
+New-WebSite -Name "MonSite" -Port 80 -HostHeader "monsite.local" `
+  -PhysicalPath "C:\inetpub\monsite"
+
+# Lister les sites
+Get-WebSite
+
+# Arrêter/Démarrer un site
+Stop-WebSite -Name "MonSite"
+Start-WebSite -Name "MonSite"
+
+# Pool d'applications (isolation des processus)
+New-WebAppPool -Name "MonSitePool"
+Set-ItemProperty IIS:\Sites\MonSite -name applicationPool -value "MonSitePool"</div>
+  </div>
+
+  <div class="retenir-box">
+    <div class="retenir-title">⭐ Commandes de diagnostic Apache</div>
+    <div class="cs-content"><ul>
+      <li><code style="font-family:var(--mono);color:#93c5fd">apache2ctl configtest</code> : TOUJOURS vérifier la syntaxe avant reload</li>
+      <li><code style="font-family:var(--mono);color:#93c5fd">tail -f /var/log/apache2/error.log</code> : suivre les erreurs en temps réel</li>
+      <li><code style="font-family:var(--mono);color:#93c5fd">apache2ctl -S</code> : liste tous les VirtualHosts actifs et leurs bindings</li>
+      <li>403 Forbidden = problème de droits (chown/chmod ou Require) · 404 = DocumentRoot incorrect · 500 = erreur de config PHP/module</li>
+      <li>En production : utiliser Let's Encrypt (certbot) pour des certificats SSL gratuits et valides</li>
+    </ul></div>
+  </div>
+</div>
+
+
+<!-- ===== SAUVEGARDE ===== -->
+<div class="fiche" id="fiche-backup">
+  <div class="fiche-header">
+    <span class="fiche-icon">💾</span>
+    <div><div class="fiche-title">Sauvegarde & Restauration</div><div class="fiche-sub">Stratégies · rsync · tar · robocopy · RAID · RPO/RTO</div></div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Stratégie 3-2-1 et types de sauvegardes</div>
+    <table class="table-cours">
+      <tr><th>Type</th><th>Ce qui est sauvegardé</th><th>Vitesse backup</th><th>Vitesse restauration</th><th>Espace</th></tr>
+      <tr><td><strong>Complète</strong></td><td>Tout à chaque fois</td><td>Lente</td><td>Rapide (1 seule backup)</td><td>Important</td></tr>
+      <tr><td><strong>Différentielle</strong></td><td>Modifications depuis la dernière COMPLÈTE</td><td>Moyenne (croît)</td><td>Moyenne (complète + 1 diff)</td><td>Moyen</td></tr>
+      <tr><td><strong>Incrémentale</strong></td><td>Modifications depuis la dernière sauvegarde</td><td>Rapide</td><td>Lente (complète + toutes incrémentales)</td><td>Minimal</td></tr>
+    </table>
+    <div class="cs-content" style="margin-top:0.75rem">
+      <strong>Règle 3-2-1 :</strong> 3 copies · 2 supports différents · 1 hors site<br>
+      <strong>RPO</strong> (Recovery Point Objective) = perte de données max acceptable (ex: RPO=4h → backup toutes les 4h)<br>
+      <strong>RTO</strong> (Recovery Time Objective) = durée max pour restaurer (ex: RTO=2h → système opérationnel en 2h max)
+    </div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">rsync — Synchronisation Linux</div>
+    <div class="code-block"># Synchronisation locale
+rsync -av /source/ /destination/
+
+# OPTIONS ESSENTIELLES :
+# -a = archive (récursif + droits + timestamps + liens symboliques)
+# -v = verbose (affiche les fichiers)
+# -z = compression pendant le transfert
+# -P = progression + reprise en cas d'interruption
+# --delete = supprime les fichiers absents de la source (miroir exact)
+# --exclude = exclure des fichiers/dossiers
+# --dry-run (-n) = simulation (TOUJOURS tester avant --delete !)
+
+# Sauvegarde vers un serveur distant
+rsync -avzP --delete /var/www/ user@192.168.1.100:/backup/www/
+
+# Exclure des répertoires
+rsync -av --exclude='*.tmp' --exclude='.git/' /source/ /destination/
+
+# Sauvegarde vers un serveur distant avec clé SSH
+rsync -avz -e "ssh -i /root/.ssh/backup_key" /data/ backup@srv-backup:/backup/
+
+# Script de sauvegarde rsync avec log
+#!/bin/bash
+rsync -avz --delete /var/www/ /backup/www/ >> /var/log/rsync_backup.log 2>&1
+echo "Backup terminé : $(date)" >> /var/log/rsync_backup.log</div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">tar — Archives Linux</div>
+    <div class="code-block"># Créer une archive compressée (gzip)
+tar -czf backup_$(date +%Y%m%d).tar.gz /var/www/html/
+
+# Créer une archive compressée (bzip2 - meilleure compression)
+tar -cjf backup_$(date +%Y%m%d).tar.bz2 /var/www/html/
+
+# Lister le contenu d'une archive
+tar -tzf archive.tar.gz
+
+# Extraire une archive dans /tmp/
+tar -xzf archive.tar.gz -C /tmp/
+
+# Extraire un fichier spécifique
+tar -xzf archive.tar.gz var/www/html/index.php
+
+# OPTIONS : c=créer, x=extraire, t=lister, z=gzip, j=bzip2, v=verbose, f=fichier</div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Robocopy — Sauvegarde Windows</div>
+    <div class="code-block"># Copier un dossier vers un backup (avec sous-dossiers)
+robocopy C:\Données D:\Backup /S /Z /LOG:C:\logs\backup.log
+
+# Miroir exact (attention : supprime les fichiers absents de la source)
+robocopy C:\Données D:\Backup /MIR /LOG:backup.log
+
+# OPTIONS ESSENTIELLES :
+# /S  = sous-répertoires (sans les vides)
+# /E  = sous-répertoires (avec les vides)
+# /MIR = miroir = /E + /PURGE
+# /Z  = mode redémarrable (reprend si interrompue)
+# /MT:8 = 8 threads (accélère la copie)
+# /LOG = fichier de log
+# /XF = exclure des fichiers (ex: /XF *.tmp *.log)
+# /XD = exclure des dossiers
+
+# Planifier avec le Planificateur de tâches Windows
+schtasks /create /sc DAILY /tn "Backup Données" /tr "robocopy C:\Données D:\Backup /MIR" /st 02:00</div>
+  </div>
+
+  <div class="retenir-box">
+    <div class="retenir-title">⭐ À retenir absolument</div>
+    <div class="cs-content"><ul>
+      <li>rsync --dry-run AVANT --delete : toujours simuler avant de détruire</li>
+      <li>RAID ≠ sauvegarde : le RAID protège contre la panne matérielle, pas contre la suppression accidentelle ou le ransomware</li>
+      <li>Tester la restauration régulièrement : une sauvegarde non testée n'est pas fiable</li>
+      <li>VSS (Shadow Copy) sur Windows permet de sauvegarder les fichiers ouverts</li>
+      <li>sfc /scannow (Windows) : répare les fichiers système corrompus</li>
+    </ul></div>
+  </div>
+</div>
+
+
+<!-- ===== GLPI & ITIL ===== -->
+<div class="fiche" id="fiche-glpi">
+  <div class="fiche-header">
+    <span class="fiche-icon">🖨️</span>
+    <div><div class="fiche-title">GLPI & ITIL</div><div class="fiche-sub">Gestion de parc · Helpdesk · CMDB · Imprimantes · WOL</div></div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">ITIL — Les processus clés pour le TSSR</div>
+    <table class="table-cours">
+      <tr><th>Processus ITIL</th><th>Définition</th><th>Exemple concret</th></tr>
+      <tr><td><strong>Gestion des incidents</strong></td><td>Restaurer le service le plus vite possible</td><td>PC qui ne démarre plus → dépannage rapide</td></tr>
+      <tr><td><strong>Gestion des problèmes</strong></td><td>Trouver et éliminer la cause racine</td><td>20 PCs crashent → analyse et correctif</td></tr>
+      <tr><td><strong>Gestion des changements</strong></td><td>Contrôler les modifications pour éviter les incidents</td><td>Mise à jour serveur → procédure CAB</td></tr>
+      <tr><td><strong>Gestion de la configuration</strong></td><td>Maintenir la CMDB à jour</td><td>Inventaire de tous les assets IT</td></tr>
+      <tr><td><strong>Gestion des niveaux de service</strong></td><td>Définir et respecter les SLA</td><td>Réponse incident P1 en moins de 4h</td></tr>
+    </table>
+    <div class="cs-content" style="margin-top:0.75rem">
+      <strong>SLA</strong> (Service Level Agreement) = engagement de niveau de service. <strong>KPI</strong> = indicateurs de performance (taux de résolution, MTTR...). <strong>MTTR</strong> = Mean Time To Repair.
+    </div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">GLPI — Fonctionnalités essentielles</div>
+    <div class="cs-content"><ul>
+      <li><strong>Inventaire</strong> : matériel (PC, serveurs, imprimantes), logiciels installés, licences. Automatisé via agent FusionInventory</li>
+      <li><strong>Tickets</strong> : incidents et demandes. Workflow : Ouvert → En cours → Résolu → Clôturé. Attribution à un technicien ou groupe</li>
+      <li><strong>CMDB</strong> : relations entre assets (ce serveur héberge ces VMs, ce PC utilise cette imprimante)</li>
+      <li><strong>Contrats</strong> : maintenance, garanties, fournisseurs avec dates d'expiration</li>
+      <li><strong>Planification</strong> : interventions, maintenances préventives</li>
+      <li><strong>Base de connaissances</strong> : documentation des solutions pour les tickets récurrents</li>
+    </ul></div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Imprimantes réseau — Configuration et déploiement</div>
+    <div class="code-block"># ===== PROCÉDURE COMPLÈTE =====
+
+# 1. Affecter une IP fixe à l'imprimante
+#    → Accéder à l'interface web de l'imprimante (http://IP_actuelle)
+#    → Paramètres réseau → IP statique : 192.168.1.200, masque, passerelle
+
+# 2. Sur le serveur d'impression Windows Server :
+#    → Outils d'admin → Gestion de l'impression
+#    → Ajouter une imprimante → Port TCP/IP
+#    → Saisir l'IP fixe de l'imprimante
+#    → Installer le pilote (téléchargé chez le fabricant)
+#    → Nommer l'imprimante (ex: HP-Laser-RDC)
+#    → Partager l'imprimante (\\SRVPRINT\HP-Laser-RDC)
+
+# 3. Déployer via GPO (tous les utilisateurs la reçoivent automatiquement)
+#    → GPMC → Nouvelle GPO
+#    → Config Utilisateur > Paramètres Windows > Imprimantes
+#    → Ajouter imprimante partagée → \\SRVPRINT\HP-Laser-RDC
+#    → Lier la GPO à l'OU concernée
+
+# PowerShell — Ajouter une imprimante manuellement
+Add-Printer -Name "HP-Laser-RDC" -DriverName "HP Universal Printing PCL 6" `
+  -PortName "IP_192.168.1.200"
+
+# Lister les imprimantes installées
+Get-Printer | Select-Object Name, DriverName, PortName, Shared</div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Wake on LAN (WOL)</div>
+    <div class="code-block"># Prérequis :
+# 1. Activer WOL dans le BIOS/UEFI du PC
+# 2. Activer sur la carte réseau :
+#    Device Manager → Adaptateurs réseau → Propriétés
+#    → Gestion de l'alimentation → Autoriser le réveil
+#    → Avancé → Wake on Magic Packet → Activé
+
+# Envoyer un magic packet depuis Linux
+# Installation : apt install wakeonlan
+wakeonlan AA:BB:CC:DD:EE:FF
+
+# Depuis PowerShell Windows
+function Send-WakeOnLan {
+    param([string]$MacAddress)
+    $mac = $MacAddress -replace '[:-]', ''
+    $bytes = [byte[]]@(0xFF,0xFF,0xFF,0xFF,0xFF,0xFF)
+    0..15 | ForEach-Object {
+        for ($i = 0; $i -lt 6; $i++) {
+            $bytes += [byte]('0x' + $mac.Substring($i*2, 2))
+        }
+    }
+    $udp = New-Object System.Net.Sockets.UdpClient
+    $udp.Connect([System.Net.IPAddress]::Broadcast, 9)
+    $udp.Send($bytes, $bytes.Length) | Out-Null
+}
+Send-WakeOnLan -MacAddress "AA-BB-CC-DD-EE-FF"
+
+# Trouver l'adresse MAC d'un PC (depuis Windows)
+arp -a | findstr "192.168.1.50"
+# Ou via PowerShell :
+Get-NetNeighbor -IPAddress 192.168.1.50</div>
+  </div>
+
+  <div class="retenir-box">
+    <div class="retenir-title">⭐ À retenir pour l'examen et les entretiens</div>
+    <div class="cs-content"><ul>
+      <li>ITIL : <strong>incident</strong> = symptôme (restaurer vite) · <strong>problème</strong> = cause racine (résoudre définitivement)</li>
+      <li>GLPI + FusionInventory = combo standard pour gestion de parc en PME/collectivité</li>
+      <li>WOL nécessite que le PC soit sur le même réseau L2 (broadcast) OU que le routeur gère le "directed broadcast"</li>
+      <li>SLA P1 (critique) : typiquement 4h de RTO · P2 (urgent) : 8h · P3 (normal) : 48-72h</li>
+      <li>Déployer des imprimantes via GPO = zéro intervention utilisateur = bonne pratique</li>
+    </ul></div>
+  </div>
+</div>
+
+
+<!-- ===== CISCO AVANCÉ ===== -->
+<div class="fiche" id="fiche-cisco-avance">
+  <div class="fiche-header">
+    <span class="fiche-icon">🔩</span>
+    <div><div class="fiche-title">Cisco IOS — Commandes avancées</div><div class="fiche-sub">Routage · NAT · ACL · Dépannage · Show commands</div></div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Configuration complète d'un routeur</div>
+    <div class="code-block">! === CONFIGURATION DE BASE D'UN ROUTEUR CISCO ===
+
+! Entrer en mode privilégié
+Router> enable
+Router# configure terminal
+
+! Nommer le routeur
+Router(config)# hostname R1
+
+! Sécuriser l'accès
+R1(config)# enable secret MonMotDePasse
+R1(config)# line console 0
+R1(config-line)# password console123
+R1(config-line)# login
+R1(config)# line vty 0 4
+R1(config-line)# password vty123
+R1(config-line)# login
+R1(config-line)# transport input ssh
+
+! Configurer les interfaces
+R1(config)# interface gi0/0           ! WAN vers Internet
+R1(config-if)# ip address 203.0.113.1 255.255.255.252
+R1(config-if)# no shutdown
+R1(config-if)# ip nat outside
+
+R1(config)# interface gi0/1           ! LAN interne
+R1(config-if)# ip address 192.168.1.1 255.255.255.0
+R1(config-if)# no shutdown
+R1(config-if)# ip nat inside
+
+! Route par défaut vers Internet
+R1(config)# ip route 0.0.0.0 0.0.0.0 203.0.113.2
+
+! Configurer le NAT (PAT = overload)
+R1(config)# access-list 1 permit 192.168.1.0 0.0.0.255
+R1(config)# ip nat inside source list 1 interface gi0/0 overload
+
+! Sauvegarder la config
+R1# write memory   ! ou : copy running-config startup-config</div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">ACL Cisco — Listes de contrôle d'accès</div>
+    <div class="code-block">! ACL STANDARD (filtre uniquement sur l'IP source)
+! À placer au plus PRÈS de la destination
+
+! Autoriser uniquement le réseau 192.168.1.0/24
+R1(config)# access-list 10 permit 192.168.1.0 0.0.0.255
+R1(config)# access-list 10 deny any      ! implicite mais bonne pratique
+
+! ACL ÉTENDUE (filtre source + destination + protocole + port)
+! À placer au plus PRÈS de la source
+
+! Autoriser HTTP/HTTPS depuis le LAN vers Internet
+R1(config)# ip access-list extended LAN-INTERNET
+R1(config-ext-nacl)# permit tcp 192.168.1.0 0.0.0.255 any eq 80
+R1(config-ext-nacl)# permit tcp 192.168.1.0 0.0.0.255 any eq 443
+R1(config-ext-nacl)# permit tcp 192.168.1.0 0.0.0.255 any eq 22
+R1(config-ext-nacl)# deny ip any any log
+
+! Appliquer sur une interface (IN = trafic entrant, OUT = sortant)
+R1(config)# interface gi0/1
+R1(config-if)# ip access-group LAN-INTERNET in
+
+! Vérifier les ACL
+R1# show ip access-lists</div>
+  </div>
+
+  <div class="cours-section">
+    <div class="cs-title">Commandes show — Dépannage</div>
+    <div class="code-block">! TABLE DE ROUTAGE
+R1# show ip route
+! C = Directly Connected  S = Static  O = OSPF  R = RIP
+
+! INTERFACES
+R1# show interfaces gi0/0              ! Statut détaillé d'une interface
+R1# show ip interface brief            ! Résumé de toutes les interfaces
+! admin down = no shutdown n'a pas été fait
+! line protocol down = problème physique ou L2
+
+! SWITCH
+Sw# show mac address-table             ! Table CAM (MAC → port)
+Sw# show vlan brief                    ! VLANs configurés et ports
+Sw# show interfaces trunk              ! Ports en mode trunk
+Sw# show spanning-tree                 ! État STP
+
+! NAT
+R1# show ip nat translations           ! Table des traductions NAT actives
+R1# show ip nat statistics             ! Statistiques NAT
+
+! ARP ET VOISINS
+R1# show ip arp                        ! Table ARP du routeur
+R1# show cdp neighbors                 ! Voisins Cisco (CDP)
+
+! CONFIGURATION
+R1# show running-config                ! Config en mémoire RAM (active)
+R1# show startup-config                ! Config en NVRAM (au boot)
+R1# show version                       ! Version IOS, uptime, mémoire</div>
+  </div>
+
+  <div class="retenir-box">
+    <div class="retenir-title">⭐ Règles d'or Cisco IOS</div>
+    <div class="cs-content"><ul>
+      <li>ACL standard = près de la <strong>destination</strong> · ACL étendue = près de la <strong>source</strong></li>
+      <li>Toute ACL se termine par un <code style="font-family:var(--mono);color:#93c5fd">deny ip any any</code> implicite — attention aux blocages involontaires</li>
+      <li><code style="font-family:var(--mono);color:#93c5fd">no shutdown</code> est obligatoire sur chaque interface (désactivées par défaut)</li>
+      <li><code style="font-family:var(--mono);color:#93c5fd">write memory</code> ou <code style="font-family:var(--mono);color:#93c5fd">copy run start</code> : TOUJOURS sauvegarder après modification</li>
+      <li>Masque générique (wildcard) = inverse du masque réseau : /24 → 0.0.0.255</li>
+    </ul></div>
+  </div>
+</div>
+
 
 </div>
 
